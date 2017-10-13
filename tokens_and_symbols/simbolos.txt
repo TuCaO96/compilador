@@ -1,0 +1,12 @@
+1,IF,se;
+2,ELSE,senao;
+3,ELSE IF,senao se;
+4,SWITCH,interruptor;
+5,T_INT,inteiro;
+6,T_STRING,linha;
+7,T_FLOAT,real;
+8,T_CHAR,caracter;
+9,T_BOOLEAN,booleano;
+10,WHILE,enquanto;
+11,RETURN,retornar;
+12,CASE,caso;
