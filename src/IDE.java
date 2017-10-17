@@ -1,9 +1,9 @@
 /* FACULDADE COTEMIG
- * TRABALHO PRÁTICO - COMPILADORES
+ * TRABALHO PRï¿½TICO - COMPILADORES
  * IDE PARA COMPILADOR
- * REVISÃO: 2017.2.1
+ * REVISï¿½O: 2017.2.1
  * AUTOR: prof. VIRGILIO BORGES DE OLIVEIRA.
- * DATA DA ÚLTIMA ALTERAÇÃO: 09/10/2017
+ * DATA DA ï¿½LTIMA ALTERAï¿½ï¿½O: 09/10/2017
  **/
  
 import java.awt.Color;
@@ -25,8 +25,15 @@ import javax.swing.JTextPane;
 import javax.swing.KeyStroke;
 
 public class IDE extends JFrame implements ActionListener {
+    //array de tokens
+    public String[] TOKENS  = {"TERM", "ID", "NUM_INTEIRO", "NUM_REAL", "OP_SOMA", "OP_SUBTRAI", "OP_MULTIPLICA",
+            "OP_POTENCIA", "OP_DIVISAO", "OP_IGUAL", "OP_OR", "OP_AND", "ABRE_ARRAY", "FECHA_ARRAY", "SEPARADOR",
+            "ATRIB", "ABRE_BLOCO", "FECHA_BLOCO", "OP_MAIOR", "OP_MAIOR_IGUAL", "OP_MENOR", "OP_MENOR_IGUAL",
+            "ABRE_EXPR", "FECHA_EXPR", "MOD", "DIFERENTE", "NEGA", "CHAR" ,"STRING", "INPUT", "OUTPUT", "EOF"
+    };
+
 	JTextPane editor = new JTextPane();
-	JScrollPane p1 = new JScrollPane(editor); 
+	JScrollPane p1 = new JScrollPane(editor);
 	
 	JTextPane msg = new JTextPane();
 	JScrollPane p2 = new JScrollPane(msg); 
@@ -45,7 +52,7 @@ public class IDE extends JFrame implements ActionListener {
 	JMenuItem mnSobre = new JMenuItem("Sobre...", KeyEvent.VK_S);
 	
     public IDE() {
-    	super("Compiladores - IDE versão 2017.2.1");
+    	super("Compiladores - IDE versÃ£o 2017.2.1");
     	setLayout(null);
     	
     	mnBar.add(mnArquivo);
@@ -114,14 +121,23 @@ public class IDE extends JFrame implements ActionListener {
 			}   		
     	}
     	else if(e.getSource() == mnCompilar) {
-//    		Lexico lex = new Lexico(editor, msg);
-//    		lex.analisar();
+    		Lexico lex = new Lexico(editor, msg);
+            int token = lex.anaLex();
+            //descobrir porque o while esta dando loop infinito
+            /*while (token != 35){
+                msg.setText(msg.getText() + "\n Token identificado: " + TOKENS[token]);
+            }*/
+            msg.setText(msg.getText() + "\n Fim da execuÃ§Ã£o");
     	}
     	else if(e.getSource() == mnSair) {
     		System.exit(0);    		
     	}
     	else if(e.getSource() == mnSobre) {
-    		JOptionPane.showMessageDialog(this, "Trabalho de Compiladores\nIDE versão 2017.2.1\n\nDesenvolvido por: prof. Virgilio Borges de Oliveira\nSomente para fins didáticos.");
+    		JOptionPane.showMessageDialog(this, "Trabalho de Compiladores" +
+                    "\nIDE versÃ£o 2017.2.1\n" +
+                    "\nDesenvolvido por: prof. Virgilio Borges de Oliveira" +
+                    "\nModificado por: Arthur MendonÃ§a Ribeiro" +
+					"\nSomente para fins didÃ¡ticos.");
     	}
 
     }

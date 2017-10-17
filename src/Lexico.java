@@ -1,3 +1,4 @@
+import javax.swing.*;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -7,6 +8,11 @@ import java.util.Scanner;
 import java.util.regex.Pattern;
 
 public class Lexico {
+
+    private JTextPane editor;
+
+    private JTextPane msg;
+
     //tokens
     public final int TERM = 0;
     public final int ID = 1;
@@ -39,140 +45,121 @@ public class Lexico {
     public final int STRING = 28;
     public final int INPUT = 29;
     public final int OUTPUT = 30;
-    public final int EOF = 31;
+    public final int WHILE = 31;
+    public final int IF = 32;
+    public final int ELSE = 33;
+    public final int ELSEIF = 34;
+    public final int EOF = 35;
 
-    //array de simbolos
-    ArrayList<Simbolo> simbolos;
-    //array de tokens
-    public String[] TOKEN  = {"TERM", "ID", "NUM_INTEIRO", "NUM_REAL", "OP_SOMA", "OP_SUBTRAI", "OP_MULTIPLICA",
-            "OP_POTENCIA", "OP_DIVISAO", "OP_IGUAL", "OP_OR", "OP_AND", "ABRE_ARRAY", "FECHA_ARRAY", "SEPARADOR",
-            "ATRIB", "ABRE_BLOCO", "FECHA_BLOCO", "OP_MAIOR", "OP_MAIOR_IGUAL", "OP_MENOR", "OP_MENOR_IGUAL",
-            "ABRE_EXPR", "FECHA_EXPR", "MOD", "DIFERENTE", "NEGA", "CHAR" ,"STRING", "INPUT", "OUTPUT", "EOF"
-    };
-
-	int pos = 0, contLinhas = 0;
+	int posIni = 0, posFim = 0, linhaAtual = 1;
 
     String entrada;
 
 	public int anaLex() {
         int estado = 0;
 
-		while (pos < entrada.length()) {
-			char c = entrada.charAt(pos++);
-                        
-			System.out.println("[DEBUG] Caractere lido: " + c);
+		while (posFim < entrada.length()) {
+            char c = entrada.charAt(posFim++);
 
-			//INICIO SWITCH DE ESTADOS
-            case 0:
-            	if(c == '\n'){
-            	    contLinhas++;
-                }
+            this.msg.setText(this.msg.getText() + "\n[DEBUG] Caractere lido: " + c);
 
-                //se for digito
-                if(Character.isDigit(c)){
-            	    estado = 1;
-                }
+            switch (estado) {
+                //INICIO SWITCH DE ESTADOS
+                case 0:
+                    if (c == '\n') {
+                        linhaAtual++;
+                    }
 
-                //se for letra
-                if(Character.isLetter(c)){
-                    estado = 2;
-                }
+                    else if(c == '\t'){
+                        estado = 0;
+                    }
 
-                //vai pro estado nega, se vier depois um = vai pro diferente
-                if(c == '!'){
-                    estado = 3;
-                }
+                    else if(c == '\r'){
+                        estado = 0;
+                    }
 
-                if(c == ':'){
-                    estado = 4;
-                }
+                    //se for digito
+                    else if (Character.isDigit(c)) {
+                        estado = 1;
+                    }
+                    //se for letra
+                    else if (Character.isLetter(c)) {
+                        estado = 2;
+                    }
+                    //vai pro estado nega, se vier depois um = vai pro diferente
+                    else if (c == '!') {
+                        estado = 3;
+                    } else if (c == ':') {
+                        estado = 4;
+                    } else if (c == '>') {
+                        estado = 5;
+                    } else if (c == '<') {
+                        estado = 6;
+                    } else if (c == '+') {
+                        estado = 7;
+                    } else if (c == '-') {
+                        estado = 8;
+                    } else if (c == '&') {
+                        estado = 9;
+                    } else if (c == '|') {
+                        estado = 10;
+                    } else if (c == ';') {
+                        estado = 11;
+                    } else if (c == '(') {
+                        estado = 12;
+                    } else if (c == '{') {
+                        estado = 12;
+                    } else if (c == '[') {
+                        estado = 12;
+                    } else if (c == '\"') {
+                        posIni = posFim - 1;
+                        estado = 13;
+                    } else if (c == '\'') {
+                        estado = 14;
+                    }
 
-                if(c == '>'){
-                    estado = 5;
-                }
+                    break;
+                case 1:
 
-                if(c == '<'){
-                    estado = 6;
-                }
+                    break;
+                case 2:
 
-                if(c == '+'){
-                    estado = 7;
-                }
+                    break;
+                case 3:
 
-                if(c == '-'){
-                    estado = 8;
-                }
+                    break;
+                case 13:
+                    if(c == '\"'){
+                        return STRING;
+                    }
+                    else{
+                        estado = 13;
+                    }
+                    break;
+                case 14:
+                    break;
+                default:
+                    erro(c);
+                    break;
+                //FIM SWITCH DE ESTADOS
+            }
 
-                if(c == '&'){
-                    estado = 9;
-                }
-
-                if(c == '|'){
-                    estado = 10;
-                }
-
-                break;
-			//FIM SWITCH DE ESTADOS
-
-			String lex = entrada.substring(0, pos);
-		}
+            String lex = entrada.substring(posIni, posFim);
+            this.msg.setText(this.msg.getText() + "\n[DEBUG] Lexema atual: " + lex);
+        }
 
 		//fim do arquivo
-		return -1;
+		return 35;
 	}
 
 	public void erro(char c) {
-		System.out.println("Erro léxico na coluna " + pos + ", no caractere " + c + ".");
-	}
-	
-	public Lexico() {
-		int token;
-		token = anaLex();
-        while(token != EOF){
-            token = anaLex();
-        }
-
+        this.msg.setText(this.msg.getText() + "\nErro léxico na coluna " + posFim + ", no caractere " + c + ", na linha " + linhaAtual + ".");
 	}
 
-	public ArrayList<Simbolo> initTabelaSimbolos(){
-		ArrayList<Simbolo> simbolos = new ArrayList<>();
+    public Lexico(JTextPane editor, JTextPane msg) {
+        this.editor = editor;
+        this.msg = msg;
 
-		try {
-
-			File f = new File("tokens_and_symbols/simbolos.txt");
-
-			Scanner scan = new Scanner(f);
-
-			BufferedReader b = new BufferedReader(new FileReader(f));
-
-			String linha, posicao, token, lexema;
-
-			//delimitador para nova linha é o ;
-			scan.useDelimiter(Pattern.compile(";"));
-			while (scan.hasNext()) {
-				//proxima linha
-				linha = scan.next();
-				//dividimos a linha por cada virgula encontrada
-				String[] partes = linha.split(",");
-				//e entao salvamos cada informacao encontrada no objeto
-				Simbolo simbolo = new Simbolo();
-				simbolo.setPosicao(Integer.parseInt(partes[0]));
-				simbolo.setToken(partes[1]);
-				simbolo.setLexema(partes[2]);
-				//adiciona novo simbolo na tabela
-				simbolos.add(simbolo);
-			}
-
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
-		return simbolos;
-	}
-
-	public static void main(String[] args) {
-		Lexico lex = new Lexico();
-		lex.initTabelaSimbolos();
-	}
-
+        entrada = editor.getText();
+    }
 }
