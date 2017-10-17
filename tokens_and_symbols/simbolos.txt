@@ -10,3 +10,5 @@
 10,WHILE,enquanto;
 11,RETURN,retornar;
 12,CASE,caso;
+13,INPUT,ler;
+14,OUTPUT,escrever;

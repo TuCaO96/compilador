@@ -7,8 +7,7 @@ import java.util.Scanner;
 import java.util.regex.Pattern;
 
 public class Lexico {
-    //estados finais
-    public final int EOF = -1;
+    //tokens
     public final int TERM = 0;
     public final int ID = 1;
     public final int NUM_INTEIRO = 2;
@@ -38,10 +37,20 @@ public class Lexico {
     public final int NEGA = 26;
     public final int CHAR = 27;
     public final int STRING = 28;
-	//array de simbolos
-	ArrayList<Simbolo> simbolos;
+    public final int INPUT = 29;
+    public final int OUTPUT = 30;
+    public final int EOF = 31;
 
-	int pos;
+    //array de simbolos
+    ArrayList<Simbolo> simbolos;
+    //array de tokens
+    public String[] TOKEN  = {"TERM", "ID", "NUM_INTEIRO", "NUM_REAL", "OP_SOMA", "OP_SUBTRAI", "OP_MULTIPLICA",
+            "OP_POTENCIA", "OP_DIVISAO", "OP_IGUAL", "OP_OR", "OP_AND", "ABRE_ARRAY", "FECHA_ARRAY", "SEPARADOR",
+            "ATRIB", "ABRE_BLOCO", "FECHA_BLOCO", "OP_MAIOR", "OP_MAIOR_IGUAL", "OP_MENOR", "OP_MENOR_IGUAL",
+            "ABRE_EXPR", "FECHA_EXPR", "MOD", "DIFERENTE", "NEGA", "CHAR" ,"STRING", "INPUT", "OUTPUT", "EOF"
+    };
+
+	int pos = 0, contLinhas = 0;
 
     String entrada;
 
@@ -49,12 +58,60 @@ public class Lexico {
         int estado = 0;
 
 		while (pos < entrada.length()) {
-			char c = getCaracter(entrada);
+			char c = entrada.charAt(pos++);
                         
 			System.out.println("[DEBUG] Caractere lido: " + c);
 
 			//INICIO SWITCH DE ESTADOS
+            case 0:
+            	if(c == '\n'){
+            	    contLinhas++;
+                }
 
+                //se for digito
+                if(Character.isDigit(c)){
+            	    estado = 1;
+                }
+
+                //se for letra
+                if(Character.isLetter(c)){
+                    estado = 2;
+                }
+
+                //vai pro estado nega, se vier depois um = vai pro diferente
+                if(c == '!'){
+                    estado = 3;
+                }
+
+                if(c == ':'){
+                    estado = 4;
+                }
+
+                if(c == '>'){
+                    estado = 5;
+                }
+
+                if(c == '<'){
+                    estado = 6;
+                }
+
+                if(c == '+'){
+                    estado = 7;
+                }
+
+                if(c == '-'){
+                    estado = 8;
+                }
+
+                if(c == '&'){
+                    estado = 9;
+                }
+
+                if(c == '|'){
+                    estado = 10;
+                }
+
+                break;
 			//FIM SWITCH DE ESTADOS
 
 			String lex = entrada.substring(0, pos);
@@ -64,10 +121,6 @@ public class Lexico {
 		return -1;
 	}
 
-	public char getCaracter(String entrada) {
-		return entrada.charAt(pos++);
-	}
-
 	public void erro(char c) {
 		System.out.println("Erro léxico na coluna " + pos + ", no caractere " + c + ".");
 	}
@@ -75,7 +128,7 @@ public class Lexico {
 	public Lexico() {
 		int token;
 		token = anaLex();
-        while(token != -1){
+        while(token != EOF){
             token = anaLex();
         }
 
@@ -86,7 +139,7 @@ public class Lexico {
 
 		try {
 
-			File f = new File("src/com/mkyong/data.txt");
+			File f = new File("tokens_and_symbols/simbolos.txt");
 
 			Scanner scan = new Scanner(f);
 
@@ -118,7 +171,8 @@ public class Lexico {
 	}
 
 	public static void main(String[] args) {
-		new Lexico();
+		Lexico lex = new Lexico();
+		lex.initTabelaSimbolos();
 	}
 
 }
