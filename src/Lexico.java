@@ -63,45 +63,50 @@ public class Lexico {
 
 //            this.msg.setText(this.msg.getText() + "\n[DEBUG] Caractere lido: " + c);
 //            this.msg.setText(this.msg.getText() + "\n[DEBUG] Estado final: " + estado);
-
+            //INICIO SWITCH DE ESTADOS
             switch (estado) {
-                //INICIO SWITCH DE ESTADOS
                 case 0:
                     if (c == '\n') {
                         linhaAtual++;
                         estado = 0;
                     }
-
-
-                    else if(c == '\t'){
+                    //ignora tabulação, o \r e espaço
+                    else if(c == '\t' || c == '\r' || c == ' '){
                         estado = 0;
                     }
-
-                    else if(c == '\r'){
-                        estado = 0;
-                    }
-
-                    //se for digito
+                    //se for numero
                     else if (Character.isDigit(c)) {
                         estado = 1;
                     }
                     //se for letra
                     else if (Character.isLetter(c)) {
                         estado = 2;
+                        posIni = pos - 1;
+                        posFim = pos;
                     }
                     //vai pro estado nega, se vier depois um = vai pro diferente
                     else if (c == '!') {
                         estado = 3;
+                        posIni = pos - 1;
+                        posFim = pos;
                     } else if (c == ':') {
                         estado = 4;
                     } else if (c == '>') {
                         estado = 5;
+                        posIni = pos - 1;
+                        posFim = pos;
                     } else if (c == '<') {
                         estado = 6;
+                        posIni = pos - 1;
+                        posFim = pos;
                     } else if (c == '+') {
                         estado = 7;
+                        posIni = pos - 1;
+                        posFim = pos;
                     } else if (c == '-') {
                         estado = 8;
+                        posIni = pos - 1;
+                        posFim = pos;
                     } else if (c == '&') {
                         estado = 9;
                         posIni = pos - 1;
@@ -117,15 +122,47 @@ public class Lexico {
                     } else if (c == '(') {
                         estado = 12;
                     } else if (c == '{') {
-                        estado = 12;
+                        estado = 29;
                     } else if (c == '[') {
-                        estado = 12;
+                        estado = 30;
                     } else if (c == '\"') {
                         estado = 13;
                         posIni = pos - 1;
                         posFim = pos;
                     } else if (c == '\'') {
                         estado = 15;
+                        posIni = pos - 1;
+                        posFim = pos;
+                    } else if (c == '*') {
+                        estado = 21;
+                        posIni = pos - 1;
+                        posFim = pos;
+                    } else if (c == '=') {
+                        estado = 23;
+                        posIni = pos - 1;
+                        posFim = pos;
+                    } else if (c == '/') {
+                        estado = 24;
+                        posIni = pos - 1;
+                        posFim = pos;
+                    } else if (c == ',') {
+                        estado = 25;
+                        posIni = pos - 1;
+                        posFim = pos;
+                    } else if (c == '%') {
+                        estado = 26;
+                        posIni = pos - 1;
+                        posFim = pos;
+                    } else if (c == ')') {
+                        estado = 31;
+                        posIni = pos - 1;
+                        posFim = pos;
+                    } else if (c == '}') {
+                        estado = 32;
+                        posIni = pos - 1;
+                        posFim = pos;
+                    }else if (c == ']') {
+                        estado = 33;
                         posIni = pos - 1;
                         posFim = pos;
                     }
@@ -139,13 +176,81 @@ public class Lexico {
                     }
 
                     break;
-
+                case 1:
+                    posFim = pos;
+                    if(Character.isDigit(c)){
+                        estado = 1;
+                    }
+                    else if(c == '.'){
+                        estado = 27;
+                    }
+                    else{
+                        pos--;
+                        return NUM_INTEIRO;
+                    }
+                    break;
                 case 2:
-
+                    posFim = pos;
+                    if(Character.isLetter(c) || Character.isDigit(c) || c == '_'){
+                        estado = 2;
+                    }
+                    else{
+                        pos--;
+                        return ID;
+                    }
                     break;
+                //reconhece o !
                 case 3:
-
+                    posFim = pos - 1;
+                    if(c == '='){
+                        estado = 17;
+                    }
+                    else{
+                        pos--;
+                        return NEGA;
+                    }
                     break;
+                //reconhece o >
+                case 5:
+                    posFim = pos - 1;
+                    if(c == '='){
+                        estado = 18;
+                    }
+                    else{
+                        pos--;
+                        return OP_MAIOR;
+                    }
+                    break;
+                //reconhece o <
+                case 6:
+                    posFim = pos - 1;
+                    if(c == '='){
+                        estado = 19;
+                    }
+                    else{
+                        pos--;
+                        return OP_MENOR;
+                    }
+                    break;
+                //reconhece o :
+                case 4:
+                    posFim = pos - 1;
+                    if(c == '='){
+                        estado = 20;
+                    }
+                    else
+                        erro(c);
+                    break;
+                //reconhece o +
+                case 7:
+                    posFim = pos - 1;
+                    pos--;
+                    return OP_SOMA;
+                //reconhece o -
+                case 8:
+                    posFim = pos - 1;
+                    pos--;
+                    return OP_SUBTRAI;
                 //reconhece o &
                 case 9:
                     posFim = pos - 1;
@@ -161,6 +266,11 @@ public class Lexico {
                     posFim = pos - 1;
                     pos--;
                     return TERM;
+                //se vier um ), ele vai pro estado final de fecha expr
+                case 12:
+                    posFim = pos - 1;
+                    pos--;
+                    return ABRE_EXPR;
                 //se vier outro ", ele vai pro estado final de fecha string
                 case 13:
                     posFim = pos;
@@ -184,6 +294,86 @@ public class Lexico {
                         estado = 15;
                     }
                     break;
+                case 16:
+                    break;
+                case 17:
+                    pos--;
+                    return DIFERENTE;
+                case 18:
+                    pos--;
+                    return OP_MAIOR_IGUAL;
+                case 19:
+                    pos--;
+                    return OP_MENOR_IGUAL;
+                case 20:
+                    pos--;
+                    return ATRIB;
+                case 21:
+                    posFim = pos - 1;
+                    if(c == '*'){
+                        estado = 22;
+                    }
+                    else{
+                        pos--;
+                        return OP_MULTIPLICA;
+                    }
+                    break;
+                case 22:
+                    pos--;
+                    return OP_POTENCIA;
+                //reconhece o =
+                case 23:
+                    posFim = pos - 1;
+                    pos--;
+                    return OP_IGUAL;
+                //reconhece o /
+                case 24:
+                    posFim = pos - 1;
+                    pos--;
+                    return OP_DIVISAO;
+                //reconhece o ,
+                case 25:
+                    posFim = pos - 1;
+                    pos--;
+                    return SEPARADOR;
+                //reconhece o %
+                case 26:
+                    posFim = pos - 1;
+                    pos--;
+                    return MOD;
+                //reconhece o numero real no prox estado
+                case 27:
+                    posFim = pos - 1;
+                    if(Character.isDigit(c)){
+                        estado = 28;
+                    }
+                    else{
+                        erro(c);
+                    }
+                    break;
+                case 28:
+                    pos--;
+                    return NUM_REAL;
+                case 29:
+                    posFim = pos - 1;
+                    pos--;
+                    return ABRE_BLOCO;
+                case 30:
+                    posFim = pos - 1;
+                    pos--;
+                    return ABRE_ARRAY;
+                case 31:
+                    posFim = pos - 1;
+                    pos--;
+                    return FECHA_EXPR;
+                case 32:
+                    posFim = pos - 1;
+                    pos--;
+                    return FECHA_BLOCO;
+                case 33:
+                    posFim = pos - 1;
+                    pos--;
+                    return FECHA_ARRAY;
                 default:
                     erro(c);
                     break;
