@@ -358,8 +358,14 @@ public class Lexico {
                     }
                     break;
                 case 28:
-                    pos--;
-                    return NUM_REAL;
+                    if(!Character.isDigit(c)){
+                        pos--;
+                        return NUM_REAL;
+                    }
+                    else{
+                        estado = 28;
+                    }
+                    break;
                 case 29:
                     posFim = pos - 1;
                     pos--;
