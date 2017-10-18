@@ -61,8 +61,8 @@ public class Lexico {
 		while (pos < entrada.length()) {
             char c = entrada.charAt(pos++);
 
-//            this.msg.setText(this.msg.getText() + "\n[DEBUG] Caractere lido: " + c);
-//            this.msg.setText(this.msg.getText() + "\n[DEBUG] Estado final: " + estado);
+            this.msg.setText(this.msg.getText() + "\n[DEBUG] Caractere lido: " + c);
+            this.msg.setText(this.msg.getText() + "\n[DEBUG] Estado final: " + estado);
             //INICIO SWITCH DE ESTADOS
             switch (estado) {
                 case 0:
@@ -77,6 +77,8 @@ public class Lexico {
                     //se for numero
                     else if (Character.isDigit(c)) {
                         estado = 1;
+                        posIni = pos - 1;
+                        posFim = pos;
                     }
                     //se for letra
                     else if (Character.isLetter(c)) {
@@ -121,10 +123,16 @@ public class Lexico {
                         posFim = pos;
                     } else if (c == '(') {
                         estado = 12;
+                        posIni = pos - 1;
+                        posFim = pos;
                     } else if (c == '{') {
                         estado = 29;
+                        posIni = pos - 1;
+                        posFim = pos;
                     } else if (c == '[') {
                         estado = 30;
+                        posIni = pos - 1;
+                        posFim = pos;
                     } else if (c == '\"') {
                         estado = 13;
                         posIni = pos - 1;
@@ -294,13 +302,11 @@ public class Lexico {
                 case 15:
                     posFim = pos;
                     if(c == '\''){
-                        estado = 16;
+                        erro(c);
                     }
                     else{
-                        estado = 15;
+                        estado = 37;
                     }
-                    break;
-                case 16:
                     break;
                 case 17:
                     pos--;
@@ -416,6 +422,15 @@ public class Lexico {
                         estado = 35;
                     }
                     break;
+                case 37:
+                    posFim = pos - 1;
+                    if(c == '\''){
+                        return CHAR;
+                    }
+                    else{
+                        erro(c);
+                    }
+                    break;
                 default:
                     erro(c);
                     break;
@@ -423,7 +438,7 @@ public class Lexico {
             }
 
             String lex = entrada.substring(posIni, posFim);
-//            this.msg.setText(this.msg.getText() + "\n[DEBUG] Lexema atual: " + lex);
+            this.msg.setText(this.msg.getText() + "\n[DEBUG] Lexema atual: " + lex);
         }
 
         if(estado == 13){
