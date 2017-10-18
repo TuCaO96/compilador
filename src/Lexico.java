@@ -227,6 +227,12 @@ public class Lexico {
                     if(c == '='){
                         estado = 19;
                     }
+                    else if(c == '-'){
+                        estado = 34;
+                    }
+                    else if(c == ':'){
+                        estado = 35;
+                    }
                     else{
                         pos--;
                         return OP_MENOR;
@@ -374,6 +380,36 @@ public class Lexico {
                     posFim = pos - 1;
                     pos--;
                     return FECHA_ARRAY;
+                case 34:
+                    posFim = pos - 1;
+                    if(c == '\n'){
+                        estado = 0;
+                    }
+                    else{
+                        estado = 34;
+                    }
+                    break;
+                case 35:
+                    posFim = pos - 1;
+                    if(c == ':'){
+                        estado = 36;
+                    }
+                    else {
+                        estado = 35;
+                    }
+                    break;
+                case 36:
+                    posFim = pos - 1;
+                    if(c == ':'){
+                        estado = 36;
+                    }
+                    else if(c == '>'){
+                        estado = 0;
+                    }
+                    else {
+                        estado = 35;
+                    }
+                    break;
                 default:
                     erro(c);
                     break;
