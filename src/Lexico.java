@@ -51,24 +51,27 @@ public class Lexico {
     public final int ELSEIF = 34;
     public final int EOF = 35;
 
-	int posIni = 0, posFim = 0, linhaAtual = 1;
+	int posIni = 0, posFim = 0, pos = 0, linhaAtual = 1;
 
     String entrada;
 
 	public int anaLex() {
         int estado = 0;
 
-		while (posFim < entrada.length()) {
-            char c = entrada.charAt(posFim++);
+		while (pos < entrada.length()) {
+            char c = entrada.charAt(pos++);
 
-            this.msg.setText(this.msg.getText() + "\n[DEBUG] Caractere lido: " + c);
+//            this.msg.setText(this.msg.getText() + "\n[DEBUG] Caractere lido: " + c);
+//            this.msg.setText(this.msg.getText() + "\n[DEBUG] Estado final: " + estado);
 
             switch (estado) {
                 //INICIO SWITCH DE ESTADOS
                 case 0:
                     if (c == '\n') {
                         linhaAtual++;
+                        estado = 0;
                     }
+
 
                     else if(c == '\t'){
                         estado = 0;
@@ -101,10 +104,16 @@ public class Lexico {
                         estado = 8;
                     } else if (c == '&') {
                         estado = 9;
+                        posIni = pos - 1;
+                        posFim = pos;
                     } else if (c == '|') {
                         estado = 10;
+                        posIni = pos - 1;
+                        posFim = pos;
                     } else if (c == ';') {
                         estado = 11;
+                        posIni = pos - 1;
+                        posFim = pos;
                     } else if (c == '(') {
                         estado = 12;
                     } else if (c == '{') {
@@ -112,31 +121,68 @@ public class Lexico {
                     } else if (c == '[') {
                         estado = 12;
                     } else if (c == '\"') {
-                        posIni = posFim - 1;
                         estado = 13;
+                        posIni = pos - 1;
+                        posFim = pos;
                     } else if (c == '\'') {
-                        estado = 14;
+                        estado = 15;
+                        posIni = pos - 1;
+                        posFim = pos;
+                    }
+                    else if(c == '$'){
+                        //define inicio do novo lexema
+                        posIni = pos - 1;
+                        posFim = pos;
+                    }
+                    else{
+                        erro(c);
                     }
 
                     break;
-                case 1:
 
-                    break;
                 case 2:
 
                     break;
                 case 3:
 
                     break;
+                //reconhece o &
+                case 9:
+                    posFim = pos - 1;
+                    pos--;
+                    return OP_AND;
+                //reconhece o |
+                case 10:
+                    posFim = pos - 1;
+                    pos--;
+                    return OP_OR;
+                //reconhece o terminador
+                case 11:
+                    posFim = pos - 1;
+                    pos--;
+                    return TERM;
+                //se vier outro ", ele vai pro estado final de fecha string
                 case 13:
+                    posFim = pos;
                     if(c == '\"'){
-                        return STRING;
+                        estado = 14;
                     }
                     else{
                         estado = 13;
                     }
                     break;
+                //estado final de fecha string
                 case 14:
+                    pos--;
+                    return STRING;
+                case 15:
+                    posFim = pos;
+                    if(c == '\''){
+                        estado = 16;
+                    }
+                    else{
+                        estado = 15;
+                    }
                     break;
                 default:
                     erro(c);
@@ -145,11 +191,19 @@ public class Lexico {
             }
 
             String lex = entrada.substring(posIni, posFim);
-            this.msg.setText(this.msg.getText() + "\n[DEBUG] Lexema atual: " + lex);
+//            this.msg.setText(this.msg.getText() + "\n[DEBUG] Lexema atual: " + lex);
+        }
+
+        if(estado == 13){
+            this.msg.setText(this.msg.getText() + "\nFaltou fechar string na coluna " + posFim + ", na linha " + linhaAtual + ".");
+        }
+
+        if(estado == 15){
+            this.msg.setText(this.msg.getText() + "\nFaltou fechar caractere na coluna " + posFim + ", na linha " + linhaAtual + ".");
         }
 
 		//fim do arquivo
-		return 35;
+		return EOF;
 	}
 
 	public void erro(char c) {
@@ -160,6 +214,6 @@ public class Lexico {
         this.editor = editor;
         this.msg = msg;
 
-        entrada = editor.getText();
+        entrada = editor.getText() + "$";
     }
 }

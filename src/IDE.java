@@ -26,10 +26,11 @@ import javax.swing.KeyStroke;
 
 public class IDE extends JFrame implements ActionListener {
     //array de tokens
-    public String[] TOKENS  = {"TERM", "ID", "NUM_INTEIRO", "NUM_REAL", "OP_SOMA", "OP_SUBTRAI", "OP_MULTIPLICA",
+    public String[] TOKENS  = {"TERMINADOR", "ID", "NUM_INTEIRO", "NUM_REAL", "OP_SOMA", "OP_SUBTRAI", "OP_MULTIPLICA",
             "OP_POTENCIA", "OP_DIVISAO", "OP_IGUAL", "OP_OR", "OP_AND", "ABRE_ARRAY", "FECHA_ARRAY", "SEPARADOR",
             "ATRIB", "ABRE_BLOCO", "FECHA_BLOCO", "OP_MAIOR", "OP_MAIOR_IGUAL", "OP_MENOR", "OP_MENOR_IGUAL",
-            "ABRE_EXPR", "FECHA_EXPR", "MOD", "DIFERENTE", "NEGA", "CHAR" ,"STRING", "INPUT", "OUTPUT", "EOF"
+            "ABRE_EXPR", "FECHA_EXPR", "MOD", "DIFERENTE", "NEGA", "CHAR" ,"STRING", "INPUT", "OUTPUT", "WHILE",
+            "IF", "ELSE", "ELSEIF","EOF"
     };
 
 	JTextPane editor = new JTextPane();
@@ -94,7 +95,7 @@ public class IDE extends JFrame implements ActionListener {
 		editor.setFont(new Font("Monospaced", Font.PLAIN, 13));
 		msg.setFont(new Font("Monospaced", Font.PLAIN, 13));
 		msg.setBackground(Color.LIGHT_GRAY);
-		msg.setText("Erros:");
+		msg.setText("Saída:");
     	p1.setBounds(1, 0, larg - 1, alt - 100);
     	p2.setBounds(1, alt - 100, larg - 1, 100);    	
     }
@@ -123,10 +124,13 @@ public class IDE extends JFrame implements ActionListener {
     	else if(e.getSource() == mnCompilar) {
     		Lexico lex = new Lexico(editor, msg);
             int token = lex.anaLex();
+            msg.setText(msg.getText() + "\n Token identificado: " + TOKENS[token]);
             //descobrir porque o while esta dando loop infinito
-            /*while (token != 35){
+            while (token != 35){
+                token = lex.anaLex();
                 msg.setText(msg.getText() + "\n Token identificado: " + TOKENS[token]);
-            }*/
+            }
+
             msg.setText(msg.getText() + "\n Fim da execução");
     	}
     	else if(e.getSource() == mnSair) {
