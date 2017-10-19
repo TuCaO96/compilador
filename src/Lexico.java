@@ -62,14 +62,14 @@ public class Lexico {
 
     String entrada;
 
-    String lex;
+    public String lex;
 
 	public int anaLex() {
         int estado = 0;
 
+
 		while (pos < entrada.length()) {
             char c = entrada.charAt(pos++);
-
 //            this.msg.setText(this.msg.getText() + "\n[DEBUG] Caractere lido: " + c);
 //            this.msg.setText(this.msg.getText() + "\n[DEBUG] Estado final: " + estado);
             //INICIO SWITCH DE ESTADOS
@@ -213,7 +213,6 @@ public class Lexico {
                     }
                     else{
                         pos--;
-                        msg.setText(msg.getText() + "\n Lexema: " + lex + ", posição " + pos);
                         return ID;
                     }
                     break;
