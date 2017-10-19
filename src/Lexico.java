@@ -7,6 +7,10 @@ import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.regex.Pattern;
 
+/**
+ *  @author Arthur Mendonça Ribeiro
+ */
+
 public class Lexico {
 
     private JTextPane editor;
