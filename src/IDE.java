@@ -1,11 +1,3 @@
-/* FACULDADE COTEMIG
- * TRABALHO PR�TICO - COMPILADORES
- * IDE PARA COMPILADOR
- * REVIS�O: 2017.2.1
- * AUTOR: prof. VIRGILIO BORGES DE OLIVEIRA.
- * DATA DA �LTIMA ALTERA��O: 09/10/2017
- **/
- 
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
@@ -23,6 +15,11 @@ import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
 import javax.swing.KeyStroke;
+
+/**
+ * @author Virgilio Borges de Oliveira
+ * @author Arthur Mendonça Ribeiro
+ */
 
 public class IDE extends JFrame implements ActionListener {
     //array de tokens
