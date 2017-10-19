@@ -88,7 +88,7 @@ public class IDE extends JFrame implements ActionListener {
     	getContentPane().add(p1);
     	getContentPane().add(p2);
     	setDefaultCloseOperation(EXIT_ON_CLOSE);
-    	setResizable(true);
+    	setResizable(false);
     	setVisible(true);    	
     	int larg = this.getContentPane().getWidth();
     	int alt = this.getContentPane().getHeight();
@@ -124,13 +124,14 @@ public class IDE extends JFrame implements ActionListener {
 			msg.setText("Saída:");
     		Lexico lex = new Lexico(editor, msg);
             int token = lex.anaLex();
-            msg.setText(msg.getText() + "\n Token identificado: " + TOKENS[token]);
-            //descobrir porque o while esta dando loop infinito
+			msg.setText(msg.getText() + "\n <"+ TOKENS[token] +", " + lex.lex + ">");
             while (token != 35){
                 token = lex.anaLex();
-                msg.setText(msg.getText() + "\n Token identificado: " + TOKENS[token]);
+                if(token == 35){
+                    break;
+                }
+				msg.setText(msg.getText() + "\n <"+ TOKENS[token] +", \"" + lex.lex + "\">");
             }
-
             msg.setText(msg.getText() + "\n Fim da execução");
     	}
     	else if(e.getSource() == mnSair) {
