@@ -51,9 +51,18 @@ public class Lexico {
     public final int ELSEIF = 34;
     public final int EOF = 35;
 
+    public String[] TOKENS  = {"TERMINADOR", "ID", "NUM_INTEIRO", "NUM_REAL", "OP_SOMA", "OP_SUBTRAI", "OP_MULTIPLICA",
+            "OP_POTENCIA", "OP_DIVISAO", "OP_IGUAL", "OP_OR", "OP_AND", "ABRE_ARRAY", "FECHA_ARRAY", "SEPARADOR",
+            "ATRIB", "ABRE_BLOCO", "FECHA_BLOCO", "OP_MAIOR", "OP_MAIOR_IGUAL", "OP_MENOR", "OP_MENOR_IGUAL",
+            "ABRE_EXPR", "FECHA_EXPR", "MOD", "DIFERENTE", "NEGA", "CHAR" ,"STRING", "INPUT", "OUTPUT", "WHILE",
+            "IF", "ELSE", "ELSEIF","EOF"
+    };
+
 	int posIni = 0, posFim = 0, pos = 0, linhaAtual = 1;
 
     String entrada;
+
+    String lex;
 
 	public int anaLex() {
         int estado = 0;
@@ -61,8 +70,8 @@ public class Lexico {
 		while (pos < entrada.length()) {
             char c = entrada.charAt(pos++);
 
-            this.msg.setText(this.msg.getText() + "\n[DEBUG] Caractere lido: " + c);
-            this.msg.setText(this.msg.getText() + "\n[DEBUG] Estado final: " + estado);
+//            this.msg.setText(this.msg.getText() + "\n[DEBUG] Caractere lido: " + c);
+//            this.msg.setText(this.msg.getText() + "\n[DEBUG] Estado final: " + estado);
             //INICIO SWITCH DE ESTADOS
             switch (estado) {
                 case 0:
@@ -204,6 +213,7 @@ public class Lexico {
                     }
                     else{
                         pos--;
+                        msg.setText(msg.getText() + "\n Lexema: " + lex + ", posição " + pos);
                         return ID;
                     }
                     break;
@@ -437,16 +447,16 @@ public class Lexico {
                 //FIM SWITCH DE ESTADOS
             }
 
-            String lex = entrada.substring(posIni, posFim);
-            this.msg.setText(this.msg.getText() + "\n[DEBUG] Lexema atual: " + lex);
+            lex = entrada.substring(posIni, posFim);
+//            this.msg.setText(this.msg.getText() + "\n[DEBUG] Lexema atual: " + lex);
         }
 
         if(estado == 13){
-            this.msg.setText(this.msg.getText() + "\nFaltou fechar string na coluna " + posFim + ", na linha " + linhaAtual + ".");
+            this.msg.setText(this.msg.getText() + "\nErro: Faltou fechar string na coluna " + posFim + ", na linha " + linhaAtual + ".");
         }
 
         if(estado == 15){
-            this.msg.setText(this.msg.getText() + "\nFaltou fechar caractere na coluna " + posFim + ", na linha " + linhaAtual + ".");
+            this.msg.setText(this.msg.getText() + "\nErro: Faltou fechar caractere na coluna " + posFim + ", na linha " + linhaAtual + ".");
         }
 
 		//fim do arquivo

@@ -88,16 +88,15 @@ public class IDE extends JFrame implements ActionListener {
     	getContentPane().add(p1);
     	getContentPane().add(p2);
     	setDefaultCloseOperation(EXIT_ON_CLOSE);
-    	setResizable(false);
+    	setResizable(true);
     	setVisible(true);    	
     	int larg = this.getContentPane().getWidth();
     	int alt = this.getContentPane().getHeight();
 		editor.setFont(new Font("Monospaced", Font.PLAIN, 13));
 		msg.setFont(new Font("Monospaced", Font.PLAIN, 13));
 		msg.setBackground(Color.LIGHT_GRAY);
-		msg.setText("Saída:");
     	p1.setBounds(1, 0, larg - 1, alt - 100);
-    	p2.setBounds(1, alt - 100, larg - 1, 100);    	
+    	p2.setBounds(1, alt - 100, larg - 1, 200);
     }
     
     public static void main(String[] args) {
@@ -122,6 +121,7 @@ public class IDE extends JFrame implements ActionListener {
 			}   		
     	}
     	else if(e.getSource() == mnCompilar) {
+			msg.setText("Saída:");
     		Lexico lex = new Lexico(editor, msg);
             int token = lex.anaLex();
             msg.setText(msg.getText() + "\n Token identificado: " + TOKENS[token]);
