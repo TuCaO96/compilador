@@ -127,7 +127,9 @@ public class IDE extends JFrame implements ActionListener {
                 msg.setText(msg.getText() + "\n <"+ lex.TOKENS[token] +", \"" + lex.lex + "\", " + posSimbolo + ">");
             }
             else{
-                msg.setText(msg.getText() + "\n <"+ lex.TOKENS[token] +", \"" + lex.lex + "\">");
+                if(!lex.TOKENS[token].equals("EOF")){
+                    msg.setText(msg.getText() + "\n <"+ lex.TOKENS[token] +", \"" + lex.lex + "\">");
+                }
             }
             while (!lex.TOKENS[token].equals("EOF")){
                 token = lex.anaLex();
