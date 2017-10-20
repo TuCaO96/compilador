@@ -75,7 +75,7 @@ public class IDE extends JFrame implements ActionListener {
     	setJMenuBar(mnBar);
     	
     	setSize(700, 550);
-    	msg.setEditable(false);    	
+    	msg.setEditable(false);
     	getContentPane().add(p1);
     	getContentPane().add(p2);
     	setDefaultCloseOperation(EXIT_ON_CLOSE);
@@ -87,7 +87,7 @@ public class IDE extends JFrame implements ActionListener {
 		msg.setFont(new Font("Monospaced", Font.PLAIN, 13));
 		msg.setBackground(Color.LIGHT_GRAY);
     	p1.setBounds(1, 0, larg - 1, alt - 100);
-    	p2.setBounds(1, alt - 100, larg - 1, 200);
+    	p2.setBounds(1, alt - 100, larg - 1, 100);
     }
     
     public static void main(String[] args) {
@@ -117,10 +117,10 @@ public class IDE extends JFrame implements ActionListener {
             int token = lex.anaLex(), posSimbolo;
             if(lex.TOKENS[token].equals("ID")){
                 if(lex.SYMBOLS.indexOf(lex.lex) != -1){
-                    lex.SYMBOLS.add(lex.lex);
                     posSimbolo = lex.SYMBOLS.indexOf(lex.lex);
                 }
                 else{
+                    lex.SYMBOLS.add(lex.lex);
                     posSimbolo = lex.SYMBOLS.size() - 1;
                 }
 
@@ -137,10 +137,10 @@ public class IDE extends JFrame implements ActionListener {
                 }
                 else if(lex.TOKENS[token].equals("ID")){
                     if(lex.SYMBOLS.indexOf(lex.lex) != -1){
-                        lex.SYMBOLS.add(lex.lex);
                         posSimbolo = lex.SYMBOLS.indexOf(lex.lex);
                     }
                     else{
+                        lex.SYMBOLS.add(lex.lex);
                         posSimbolo = lex.SYMBOLS.size() - 1;
                     }
                     msg.setText(msg.getText() + "\n <"+ lex.TOKENS[token] +", \"" + lex.lex + "\", " + posSimbolo + ">");

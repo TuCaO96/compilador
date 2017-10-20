@@ -106,6 +106,8 @@ public class Lexico {
                         posFim = pos;
                     } else if (c == ':') {
                         estado = 4;
+                        posIni = pos - 1;
+                        posFim = pos;
                     } else if (c == '>') {
                         estado = 5;
                         posIni = pos - 1;
@@ -261,7 +263,7 @@ public class Lexico {
                     break;
                 //reconhece o :
                 case 4:
-                    posFim = pos - 1;
+                    posFim = pos;
                     if(c == '='){
                         estado = 20;
                     }
@@ -456,10 +458,6 @@ public class Lexico {
 
         if(estado == 13){
             this.msg.setText(this.msg.getText() + "\nErro: Faltou fechar string na coluna " + posFim + ", na linha " + linhaAtual + ".");
-        }
-
-        if(estado == 15){
-            this.msg.setText(this.msg.getText() + "\nErro: Faltou fechar caractere na coluna " + posFim + ", na linha " + linhaAtual + ".");
         }
 
 		//fim do arquivo
