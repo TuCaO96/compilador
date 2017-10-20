@@ -1,10 +1,11 @@
-import java.awt.Color;
-import java.awt.Font;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -22,13 +23,6 @@ import javax.swing.KeyStroke;
  */
 
 public class IDE extends JFrame implements ActionListener {
-    //array de tokens
-    public String[] TOKENS  = {"TERMINADOR", "ID", "NUM_INTEIRO", "NUM_REAL", "OP_SOMA", "OP_SUBTRAI", "OP_MULTIPLICA",
-            "OP_POTENCIA", "OP_DIVISAO", "OP_IGUAL", "OP_OR", "OP_AND", "ABRE_ARRAY", "FECHA_ARRAY", "SEPARADOR",
-            "ATRIB", "ABRE_BLOCO", "FECHA_BLOCO", "OP_MAIOR", "OP_MAIOR_IGUAL", "OP_MENOR", "OP_MENOR_IGUAL",
-            "ABRE_EXPR", "FECHA_EXPR", "MOD", "DIFERENTE", "NEGA", "CHAR" ,"STRING", "INPUT", "OUTPUT", "WHILE",
-            "IF", "ELSE", "ELSEIF","EOF"
-    };
 
 	JTextPane editor = new JTextPane();
 	JScrollPane p1 = new JScrollPane(editor);
@@ -120,14 +114,40 @@ public class IDE extends JFrame implements ActionListener {
     	else if(e.getSource() == mnCompilar) {
 			msg.setText("Saída:");
     		Lexico lex = new Lexico(editor, msg);
-            int token = lex.anaLex();
-			msg.setText(msg.getText() + "\n <"+ TOKENS[token] +", " + lex.lex + ">");
-            while (token != 35){
+            int token = lex.anaLex(), posSimbolo;
+            if(lex.TOKENS[token].equals("ID")){
+                if(lex.SYMBOLS.indexOf(lex.lex) != -1){
+                    lex.SYMBOLS.add(lex.lex);
+                    posSimbolo = lex.SYMBOLS.indexOf(lex.lex);
+                }
+                else{
+                    posSimbolo = lex.SYMBOLS.size() - 1;
+                }
+
+                msg.setText(msg.getText() + "\n <"+ lex.TOKENS[token] +", \"" + lex.lex + "\", " + posSimbolo + ">");
+            }
+            else{
+                msg.setText(msg.getText() + "\n <"+ lex.TOKENS[token] +", \"" + lex.lex + "\">");
+            }
+            while (!lex.TOKENS[token].equals("EOF")){
                 token = lex.anaLex();
-                if(token == 35){
+                //token 35 é o EOF
+                if(lex.TOKENS[token].equals("EOF")){
                     break;
                 }
-				msg.setText(msg.getText() + "\n <"+ TOKENS[token] +", \"" + lex.lex + "\">");
+                else if(lex.TOKENS[token].equals("ID")){
+                    if(lex.SYMBOLS.indexOf(lex.lex) != -1){
+                        lex.SYMBOLS.add(lex.lex);
+                        posSimbolo = lex.SYMBOLS.indexOf(lex.lex);
+                    }
+                    else{
+                        posSimbolo = lex.SYMBOLS.size() - 1;
+                    }
+                    msg.setText(msg.getText() + "\n <"+ lex.TOKENS[token] +", \"" + lex.lex + "\", " + posSimbolo + ">");
+                }
+                else{
+                    msg.setText(msg.getText() + "\n <"+ lex.TOKENS[token] +", \"" + lex.lex + "\">");
+                }
             }
             msg.setText(msg.getText() + "\n Fim da execução");
     	}

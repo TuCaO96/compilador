@@ -52,15 +52,16 @@ public class Lexico {
     public final int WHILE = 31;
     public final int IF = 32;
     public final int ELSE = 33;
-    public final int ELSEIF = 34;
-    public final int EOF = 35;
+    public final int EOF = 34;
 
     public String[] TOKENS  = {"TERMINADOR", "ID", "NUM_INTEIRO", "NUM_REAL", "OP_SOMA", "OP_SUBTRAI", "OP_MULTIPLICA",
             "OP_POTENCIA", "OP_DIVISAO", "OP_IGUAL", "OP_OR", "OP_AND", "ABRE_ARRAY", "FECHA_ARRAY", "SEPARADOR",
             "ATRIB", "ABRE_BLOCO", "FECHA_BLOCO", "OP_MAIOR", "OP_MAIOR_IGUAL", "OP_MENOR", "OP_MENOR_IGUAL",
             "ABRE_EXPR", "FECHA_EXPR", "MOD", "DIFERENTE", "NEGA", "CHAR" ,"STRING", "INPUT", "OUTPUT", "WHILE",
-            "IF", "ELSE", "ELSEIF","EOF"
+            "IF", "ELSE","EOF"
     };
+
+    public ArrayList<String> SYMBOLS = new ArrayList<>();
 
 	int posIni = 0, posFim = 0, pos = 0, linhaAtual = 1;
 
@@ -70,7 +71,6 @@ public class Lexico {
 
 	public int anaLex() {
         int estado = 0;
-
 
 		while (pos < entrada.length()) {
             char c = entrada.charAt(pos++);
@@ -212,7 +212,7 @@ public class Lexico {
                     break;
                 case 2:
                     posFim = pos;
-                    if(Character.isLetter(c) || Character.isDigit(c) || c == '_'){
+                    if(Character.isLetter(c) || Character.isDigit(c)){
                         estado = 2;
                     }
                     else{
@@ -475,5 +475,21 @@ public class Lexico {
         this.msg = msg;
 
         entrada = editor.getText() + "$";
+
+        SYMBOLS.add("se");
+        SYMBOLS.add("senao");
+        SYMBOLS.add("interruptor");
+        SYMBOLS.add("inteiro");
+        SYMBOLS.add("linha");
+        SYMBOLS.add("real");
+        SYMBOLS.add("caractere");
+        SYMBOLS.add("booleano");
+        SYMBOLS.add("enquanto");
+        SYMBOLS.add("retornar");
+        SYMBOLS.add("caso");
+        SYMBOLS.add("parar");
+        SYMBOLS.add("padrao");
+        SYMBOLS.add("ler");
+        SYMBOLS.add("escrever");
     }
 }
