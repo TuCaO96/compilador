@@ -1,16 +1,18 @@
-public class Simbolo {
-    private int Posicao;
+public class Token {
+    private int Id;
 
     private String Token;
 
     private String Lexema;
 
-    public int getPosicao() {
-        return Posicao;
+    private String Classe;
+
+    public int getId() {
+        return Id;
     }
 
-    public void setPosicao(int posicao) {
-        Posicao = posicao;
+    public void setId(int id) {
+        Id = id;
     }
 
     public String getToken() {
@@ -27,5 +29,13 @@ public class Simbolo {
 
     public void setLexema(String lexema) {
         Lexema = lexema;
+    }
+
+    public String getClasse() {
+        return Classe;
+    }
+
+    public void setClasse(String classe) {
+        Classe = classe;
     }
 }
