@@ -53,12 +53,13 @@ public class Lexico {
     public final int IF = 32;
     public final int ELSE = 33;
     public final int EOF = 34;
+    public final int INICIO = 35;
 
     public String[] TOKENS  = {"TERMINADOR", "ID", "NUM_INTEIRO", "NUM_REAL", "OP_SOMA", "OP_SUBTRAI", "OP_MULTIPLICA",
             "OP_POTENCIA", "OP_DIVISAO", "OP_IGUAL", "OP_OR", "OP_AND", "ABRE_ARRAY", "FECHA_ARRAY", "SEPARADOR",
             "ATRIB", "ABRE_BLOCO", "FECHA_BLOCO", "OP_MAIOR", "OP_MAIOR_IGUAL", "OP_MENOR", "OP_MENOR_IGUAL",
             "ABRE_EXPR", "FECHA_EXPR", "MOD", "DIFERENTE", "NEGA", "CHAR" ,"STRING", "INPUT", "OUTPUT", "WHILE",
-            "IF", "ELSE","EOF"
+            "IF", "ELSE","EOF", "INICIO"
     };
 
     public ArrayList<String> SYMBOLS = new ArrayList<>();

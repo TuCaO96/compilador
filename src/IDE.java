@@ -113,7 +113,7 @@ public class IDE extends JFrame implements ActionListener {
     	}
     	else if(e.getSource() == mnCompilar) {
 			msg.setText("Saída:");
-    		Lexico lex = new Lexico(editor, msg);
+    		/*Lexico lex = new Lexico(editor, msg);
             int token = lex.anaLex(), posSimbolo;
             if(lex.TOKENS[token].equals("ID")){
                 if(lex.SYMBOLS.indexOf(lex.lex) != -1){
@@ -150,7 +150,7 @@ public class IDE extends JFrame implements ActionListener {
                 else{
                     msg.setText(msg.getText() + "\n <"+ lex.TOKENS[token] +", \"" + lex.lex + "\">");
                 }
-            }
+            }*/
             msg.setText(msg.getText() + "\n Fim da execução");
     	}
     	else if(e.getSource() == mnSair) {
