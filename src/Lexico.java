@@ -64,6 +64,9 @@ public class Lexico {
     public final int CASO = 43;
     public final int PARAR = 44;
     public final int PADRAO = 45;
+    public final int SWITCH = 46;
+    public final int CLASSE = 47;
+    public final int FUNCAO = 48;
 
     public String[] TOKENS  = {"TERMINADOR", "ID", "NUM_INTEIRO", "NUM_REAL", "OP_SOMA", "OP_SUBTRAI", "OP_MULTIPLICA",
             "OP_POTENCIA", "OP_DIVISAO", "OP_IGUAL", "OP_OR", "OP_AND", "ABRE_ARRAY", "FECHA_ARRAY", "SEPARADOR",
@@ -511,5 +514,9 @@ public class Lexico {
         SYMBOLS.add(new Token(43, "CASO", "caso", null));
         SYMBOLS.add(new Token(44, "PARAR", "parar", null));
         SYMBOLS.add(new Token(45, "PADRAO", "padrao", null));
+        SYMBOLS.add(new Token(46, "INTERRUPTOR", "interruptor", null));
+        SYMBOLS.add(new Token(47, "CLASSE", "classe", null));
+        SYMBOLS.add(new Token(48, "TRUE", "true", null));
+        SYMBOLS.add(new Token(49, "FALSE", "false", null));
     }
 }

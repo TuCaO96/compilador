@@ -1,3 +1,4 @@
+import javax.smartcardio.ATR;
 import javax.swing.*;
 
 public class Parser {
@@ -126,62 +127,228 @@ public class Parser {
 
     //TERMO -> FATOR {OP_MULT FATOR}*
     private void TERMO(){
-
+        FATOR();
+        while (token.getId() == lex.OP_MULTIPLICA || token.getId() == lex.OP_DIVISAO || token.getId() == lex.OP_AND){
+            OP_MULT();
+            FATOR();
+        }
     }
 
     //FATOR -> '(' EXP ')' | !FATOR | id | num | true | false | string | read()
     private void FATOR(){
-
+        if(token.getId() == lex.ABRE_EXPR){
+            casaToken(lex.ABRE_EXPR);
+            EXPR();
+            casaToken(lex.FECHA_EXPR);
+        }
+        else if(token.getId() == lex.NEGA){
+            FATOR();
+        }
+        else if(token.getId() == lex.ID){
+            casaToken(lex.ID);
+        }
+        else if(token.getId() == lex.NUM_INTEIRO){
+            casaToken(lex.NUM_INTEIRO);
+        }
+        else if(token.getId() == lex.NUM_REAL){
+            casaToken(lex.NUM_REAL);
+        }
+        else if(token.getId() == lex.STRING){
+            casaToken(lex.STRING);
+        }
+        else{
+            erro();
+        }
+        //falta implementar read e true or false
     }
 
     //OP_REL -> < | > | <= | >= | = | !=
     private void OP_REL(){
+        if(token.getId() == lex.OP_MENOR){
+            casaToken(lex.OP_MENOR);
+        }
+        else if(token.getId() == lex.OP_MENOR_IGUAL){
+            casaToken(lex.OP_MENOR_IGUAL);
+        }
+        else if(token.getId() == lex.OP_MAIOR){
+            casaToken(lex.OP_MAIOR);
+        }
+        else if(token.getId() == lex.OP_MAIOR_IGUAL){
+            casaToken(lex.OP_MAIOR_IGUAL);
+        }
 
+        else{
+            erro();
+        }
     }
 
     //OP_AD -> + | - | '|'
     private void OP_AD(){
-
+        if(token.getId() == lex.OP_SOMA){
+            casaToken(lex.OP_SOMA);
+        }
+        else if(token.getId() == lex.OP_SUBTRAI){
+            casaToken(lex.OP_SUBTRAI);
+        }
+        else if(token.getId() == lex.OP_OR){
+            casaToken(lex.OP_OR);
+        }
+        else{
+            erro();
+        }
     }
 
     //OP_MULT -> * | / | &
-    private void OP_MULT(){}
+    private void OP_MULT(){
+        if(token.getId() == lex.OP_MULTIPLICA){
+            casaToken(lex.OP_MULTIPLICA);
+        }
+        else if(token.getId() == lex.OP_DIVISAO){
+            casaToken(lex.OP_DIVISAO);
+        }
+        else if(token.getId() == lex.OP_AND){
+            casaToken(lex.OP_AND);
+        }
+        else{
+            erro();
+        }
+    }
 
     //SWITCH -> interruptor '('id')' BLOCO_SWITCH
-    private void SWITCH(){}
+    private void SWITCH(){
+        casaToken(lex.SWITCH);
+        casaToken(lex.ABRE_EXPR);
+        casaToken(lex.ID);
+        casaToken(lex.FECHA_EXPR);
+        BLOCO_SWITCH();
+    }
 
     //BLOCO_SWITCH -> '{' CASO* [PADRAO]'}'
-    private void BLOCO_SWITCH(){}
+    private void BLOCO_SWITCH(){
+        casaToken(lex.ABRE_BLOCO);
+        while (token.getId() == lex.CASO){
+            CASO();
+        }
+        if(token.getId() == lex.PADRAO){
+            PADRAO();
+        }
+        casaToken(lex.FECHA_BLOCO);
+    }
 
     //CASO -> caso LITERAL BLOCO
-    private void CASO(){}
+    private void CASO(){
+        casaToken(lex.CASO);
+        LITERAL();
+        BLOCO();
+    }
 
     //PADRAO -> padrao BLOCO
-    private void PADRAO(){}
+    private void PADRAO(){
+        casaToken(lex.PADRAO);
+        BLOCO();
+    }
 
     //LITERAL -> num_real | num_int | string | char | booleano
-    private void LITERAL(){}
+    private void LITERAL(){
+        if(token.getId() == lex.T_REAL){
+            casaToken(lex.T_REAL);
+        }
+        else if(token.getId() == lex.T_INTEIRO){
+            casaToken(lex.T_INTEIRO);
+        }
+        else if(token.getId() == lex.T_LINHA){
+            casaToken(lex.T_LINHA);
+        }
+        else if(token.getId() == lex.T_CARACTERE){
+            casaToken(lex.T_CARACTERE);
+        }
+        else if(token.getId() == lex.T_BOOLEANO){
+            casaToken(lex.T_BOOLEANO);
+        }
+        else{
+            erro();
+        }
+    }
 
     //CLASSE -> classe id BLOCO_CLASSE
-    private void CLASSE(){}
+    private void CLASSE(){
+        casaToken(lex.CLASSE);
+        casaToken(lex.ID);
+        BLOCO_CLASSE();
+    }
 
     //BLOCO_CLASSE -> {ATRIB | DECLAR | FUNCAO}+
-    private void BLOCO_CLASSE(){}
+    private void BLOCO_CLASSE(){
+        casaToken(lex.ABRE_BLOCO);
+        do{
+            if(token.getId() == lex.ID ){
+                ATRIB();
+            }
+            else if(token.getId() == lex.T_INTEIRO || token.getId() == lex.T_BOOLEANO ||
+                    token.getId() == lex.T_LINHA || token.getId() == lex.T_CARACTERE){
+                DECLAR();
+            }
+            else if(token.getId() == lex.FUNCAO){
+                FUNCAO();
+            }
+            else{
+                erro();
+            }
+        }
+        while (token.getId() != lex.FECHA_BLOCO);
+    }
 
-    //FUNCAO -> função id '('PARAMETRO [',' PARAMETRO]')' BLOCO
-    private void FUNCAO(){}
+    //FUNCAO -> funcao id '('PARAMETRO [',' PARAMETRO]')' BLOCO
+    private void FUNCAO(){
+        casaToken(lex.FUNCAO);
+        casaToken(lex.ID);
+        casaToken(lex.ABRE_EXPR);
+        PARAMETRO();
+        if(token.getId() == lex.SEPARADOR){
+            while (token.getId() == lex.SEPARADOR){
+                casaToken(lex.SEPARADOR);
+                PARAMETRO();
+            }
+        }
+        casaToken(lex.FECHA_EXPR);
+        BLOCO();
+    }
 
     //PARAMETRO -> TIPO id
-    private void PARAMETRO(){}
+    private void PARAMETRO(){
+        TIPO();
+        casaToken(lex.ID);
+    }
 
     //TIPO -> t_int, t_string, t_char, t_float, t_boolean
-    private void TIPO(){}
+    private void TIPO(){
+        if(token.getId() == lex.T_INTEIRO){
+            casaToken(lex.T_INTEIRO);
+        }
+        else if(token.getId() == lex.T_LINHA){
+            casaToken(lex.T_LINHA);
+        }
+        else if(token.getId() == lex.T_BOOLEANO){
+            casaToken(lex.T_BOOLEANO);
+        }
+        else if(token.getId() == lex.T_CARACTERE){
+            casaToken(lex.T_CARACTERE);
+        }
+        else if(token.getId() == lex.T_REAL){
+            casaToken(lex.T_REAL);
+        }
+    }
 
     //PRINT -> imprimir EXP;
-    private void PRINT(){}
+    private void PRINT(){
+        casaToken(lex.OUTPUT);
+        EXPR();
+    }
 
     //READ -> ler()
-    private void READ(){}
+    private void READ(){
+
+    }
 
     public void main(String[] args){
         S();
