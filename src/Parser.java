@@ -2,13 +2,13 @@ import javax.swing.*;
 
 public class Parser {
     private Lexico lex = new Lexico(this.editor, this.msg);
-    private int token = lex.anaLex();
+    private Token token = lex.anaLex();
     private JTextPane editor;
 
     private JTextPane msg;
 
     public void casaToken(int tokenEsperado) {
-        if(token == tokenEsperado) {
+        if(token.getId() == tokenEsperado) {
             token = lex.anaLex();
         }
         else{
@@ -23,54 +23,126 @@ public class Parser {
 
     //S -> 'inicio' id BLOCO
     private void S(){
-        casaToken(35);
-        casaToken(1);
+        casaToken(lex.INICIO);
+        casaToken(lex.ID);
         BLOCO();
     }
 
     //BLOCO -> '{' CMD* '}'
     private void BLOCO(){
-        casaToken(16);
-        while(lex.anaLex() == 32){
+        casaToken(lex.ABRE_BLOCO);
+        //enquanto id do token esperado for um dos primeiro esperados pelo cmd, continua nele
+        while(token.getId() == lex.IF || token.getId() == lex.WHILE || token.getId() == lex.ID ||
+                token.getId() == lex.T_INTEIRO || token.getId() == lex.T_BOOLEANO || 
+                token.getId() == lex.T_LINHA || token.getId() == lex.T_CARACTERE ||
+                token.getId() == lex.ABRE_BLOCO || token.getId() == lex.CASO || 
+                token.getId() == lex.PARAR){
             CMD();
         }
-        casaToken(17);
+        casaToken(lex.FECHA_BLOCO);
+        casaToken(lex.TERM);
     }
 
-    //CMD -> IF | WHILE | ATRIB | DECLAR | BLOCO | SWITCH | break;
+    //CMD -> IF | WHILE | ATRIB | DECLAR | BLOCO | SWITCH | break ;
     private void CMD(){
-
+        if(token.getId() == lex.IF){
+            IF();
+        }
+        else if(token.getId() == lex.WHILE){
+            WHILE();
+        }
+        else if(token.getId() == lex.ID){
+            ATRIB();
+        }
+        else if(token.getId() == lex.T_INTEIRO || token.getId() == lex.T_BOOLEANO ||
+                token.getId() == lex.T_LINHA || token.getId() == lex.T_CARACTERE){
+            DECLAR();
+        }
+        else if(token.getId() == lex.ABRE_BLOCO){
+            BLOCO();
+        }
+        else if(token.getId() == lex.CASO){
+            CASO();
+        }
+        else if(token.getId() == lex.PARAR){
+            casaToken(lex.PARAR);
+        }
+        casaToken(lex.TERM);
     }
 
     //IF -> se '(' EXP ')' CMD
-    private void IF(){}
+    private void IF(){
+        casaToken(lex.IF);
+        casaToken(lex.ABRE_EXPR);
+        EXPR();
+        casaToken(lex.FECHA_EXPR);
+        CMD();
+    }
 
     //WHILE -> enquanto '(' EXP ')' CMD
-    private void WHILE(){}
+    private void WHILE(){
+        casaToken(lex.WHILE);
+        casaToken(lex.ABRE_EXPR);
+        EXPR();
+        casaToken(lex.FECHA_EXPR);
+        CMD();
+    }
 
-    //DECLAR -> TIPO id {',' id}* ;
-    private void DECLAR(){}
+    //DECLAR -> TIPO id {',' id}* 
+    private void DECLAR(){
+        TIPO();
+        casaToken(lex.ID);
+        while (token.getId() == lex.SEPARADOR){
+            casaToken(lex.SEPARADOR);
+            casaToken(lex.ID);
+        }
+    }
 
-    //ATRIB -> id ':=' EXP;
-    private void ATRIB(){}
+    //ATRIB -> id ':=' EXP
+    private void ATRIB(){
+        casaToken(lex.ID);
+        casaToken(lex.ATRIB);
+        EXPR();
+    }
 
     //EXPR -> EXPRS [ OP_REL EXPRS ]
-    private void EXPR(){}
+    private void EXPR(){
+        EXPRS();
+        if(token.getId() == lex.OP_IGUAL || token.getId() == lex.DIFERENTE || token.getId() == lex.OP_MENOR_IGUAL ||
+                token.getId() == lex.OP_MENOR || token.getId() == lex.OP_MAIOR_IGUAL || token.getId() == lex.OP_MAIOR){
+            OP_REL();
+            EXPRS();
+        }
+    }
 
     //EXPRS -> TERMO { OP_AD TERMO}*
-    private void EXPRS(){}
+    private void EXPRS(){
+        TERMO();
+        while (token.getId() == lex.OP_SOMA || token.getId() == lex.OP_SUBTRAI || token.getId() == lex.OP_OR){
+            OP_AD();
+            TERMO();
+        }
+    }
 
     //TERMO -> FATOR {OP_MULT FATOR}*
-    private void TERMO(){}
+    private void TERMO(){
+
+    }
 
     //FATOR -> '(' EXP ')' | !FATOR | id | num | true | false | string | read()
-    private void FATOR(){}
+    private void FATOR(){
 
-    //OP_REL -> < | > | <= | >= | ++ | !=
-    private void OP_REL(){}
+    }
+
+    //OP_REL -> < | > | <= | >= | = | !=
+    private void OP_REL(){
+
+    }
 
     //OP_AD -> + | - | '|'
-    private void OP_AD(){}
+    private void OP_AD(){
+
+    }
 
     //OP_MULT -> * | / | &
     private void OP_MULT(){}
