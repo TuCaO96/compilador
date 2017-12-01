@@ -3,6 +3,8 @@ public class Token {
 
     private String Token;
 
+    private String Lexema;
+
     private String Classe;
 
     public int getId() {
@@ -29,9 +31,18 @@ public class Token {
         Classe = classe;
     }
 
-    public Token(int id, String token, String classe){
+    public String getLexema() {
+        return Lexema;
+    }
+
+    public void setLexema(String lexema) {
+        Lexema = lexema;
+    }
+
+    public Token(int id, String token, String lexema, String classe){
         setId(id);
         setToken(token);
+        setLexema(lexema);
         setClasse(classe);
     }
 }
