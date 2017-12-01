@@ -13,12 +13,24 @@ public class Parser {
             token = lex.anaLex();
         }
         else{
+            System.out.println("token:");
+            System.out.println(token.getId());
+            System.out.println("token esperado:");
+            System.out.println(tokenEsperado);
             //adicionar token, ja que nao estara na tabela
             erro();
         }
     }
 
     public void erro() {
+        System.out.println("posFim");
+        System.out.println(lex.posFim);
+        System.out.println("posIni");
+        System.out.println(lex.posIni);
+        System.out.println("linha atual");
+        System.out.println(lex.linhaAtual);
+        System.out.println("lexema");
+        System.out.println(lex.lex);
         this.msg.setText(this.msg.getText() + "\nErro sintático na coluna " + lex.posFim + ", na linha " + lex.linhaAtual + ".");
     }
 
@@ -41,7 +53,6 @@ public class Parser {
             CMD();
         }
         casaToken(lex.FECHA_BLOCO);
-        casaToken(lex.TERM);
     }
 
     //CMD -> IF | WHILE | ATRIB | DECLAR | BLOCO | SWITCH | break ;

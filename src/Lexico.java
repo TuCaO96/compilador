@@ -77,7 +77,7 @@ public class Lexico {
 
     public ArrayList<Token> SYMBOLS = new ArrayList<>();
 
-	int posIni = 0, posFim = 0, pos = 0, linhaAtual = 1, colunaAtual = 0;
+	int posIni = 0, posFim = 0, pos = 0, linhaAtual = 1;
 
     String entrada;
 
@@ -95,7 +95,6 @@ public class Lexico {
                 case 0:
                     if (c == '\n') {
                         linhaAtual++;
-                        colunaAtual = 0;
                         estado = 0;
                     }
                     //ignora tabulação, o \r e espaço
@@ -224,7 +223,6 @@ public class Lexico {
                     }
                     else{
                         pos--;
-                        colunaAtual = posFim;
                         return new Token(NUM_INTEIRO, "NUM_INTEIRO", lex, null);
                     }
                     break;
@@ -235,7 +233,6 @@ public class Lexico {
                     }
                     else{
                         pos--;
-                        colunaAtual = posFim;
                         //procura se existe ID na tabela de simbolos
                         //se sim, retorna o simbolo encontrado
                         for(Token t : SYMBOLS){
@@ -258,7 +255,6 @@ public class Lexico {
                     }
                     else{
                         pos--;
-                        colunaAtual = posFim;
                         return new Token(NEGA, "NEGA", lex, null);
                     }
                     break;
@@ -270,7 +266,6 @@ public class Lexico {
                     }
                     else{
                         pos--;
-                        colunaAtual = posFim;
                         return new Token(OP_MAIOR, "OP_MAIOR", lex, null);
                     }
                     break;
@@ -288,7 +283,6 @@ public class Lexico {
                     }
                     else{
                         pos--;
-                        colunaAtual = posFim;
                         return new Token(OP_MENOR, "OP_MENOR", lex, null);
                     }
                     break;
@@ -305,37 +299,31 @@ public class Lexico {
                 case 7:
                     posFim = pos - 1;
                     pos--;
-                    colunaAtual = posFim;
                     return new Token(OP_SOMA, "OP_SOMA", lex, null);
                 //reconhece o -
                 case 8:
                     posFim = pos - 1;
                     pos--;
-                    colunaAtual = posFim;
                     return new Token(OP_SUBTRAI, "OP_SUBTRAI", lex, null);
                 //reconhece o &
                 case 9:
                     posFim = pos - 1;
                     pos--;
-                    colunaAtual = posFim;
                     return new Token(OP_AND, "OP_AND", lex, null);
                 //reconhece o |
                 case 10:
                     posFim = pos - 1;
                     pos--;
-                    colunaAtual = posFim;
                     return new Token(OP_OR, "OP_OR", lex, null);
                 //reconhece o terminador
                 case 11:
                     posFim = pos - 1;
                     pos--;
-                    colunaAtual = posFim;
                     return new Token(TERM, "TERM", lex, null);
                 //se vier um ), ele vai pro estado final de fecha expr
                 case 12:
                     posFim = pos - 1;
                     pos--;
-                    colunaAtual = posFim;
                     return new Token(ABRE_EXPR, "ABRE_EXPR", lex, null);
                 //se vier outro ", ele vai pro estado final de fecha string
                 case 13:
@@ -350,7 +338,6 @@ public class Lexico {
                 //estado final de fecha string
                 case 14:
                     pos--;
-                    colunaAtual = posFim;
                     return new Token(STRING, "STRING", lex, null);
                 case 15:
                     posFim = pos;
@@ -363,18 +350,15 @@ public class Lexico {
                     break;
                 case 17:
                     pos--;
-                    colunaAtual = posFim;
                     return new Token(DIFERENTE, "DIFERENTE", lex, null);
                 case 18:
                     pos--;
-                    colunaAtual = posFim;
                     return new Token(OP_MAIOR_IGUAL, "OP_MAIOR_IGUAL", lex, null);
                 case 19:
                     pos--;
                     return new Token(OP_MENOR_IGUAL, "OP_MENOR_IGUAL", lex, null);
                 case 20:
                     pos--;
-                    colunaAtual = posFim;
                     return new Token(ATRIB, "ATRIB", lex, null);
                 case 21:
                     posFim = pos - 1;
@@ -383,37 +367,31 @@ public class Lexico {
                     }
                     else{
                         pos--;
-                        colunaAtual = posFim;
                         return new Token(OP_MULTIPLICA, "OP_MULTIPLICA", lex, null);
                     }
                     break;
                 case 22:
                     pos--;
-                    colunaAtual = posFim;
                     return new Token(OP_POTENCIA, "OP_POTENCIA", lex, null);
                 //reconhece o =
                 case 23:
                     posFim = pos - 1;
                     pos--;
-                    colunaAtual = posFim;
                     return new Token(OP_IGUAL, "OP_IGUAL", lex, null);
                 //reconhece o /
                 case 24:
                     posFim = pos - 1;
                     pos--;
-                    colunaAtual = posFim;
                     return new Token(OP_DIVISAO, "OP_DIVISAO", lex, null);
                 //reconhece o ,
                 case 25:
                     posFim = pos - 1;
                     pos--;
-                    colunaAtual = posFim;
                     return new Token(SEPARADOR, "SEPARADOR", lex, null);
                 //reconhece o %
                 case 26:
                     posFim = pos - 1;
                     pos--;
-                    colunaAtual = posFim;
                     return new Token(MOD, "MOD", lex, null);
                 //reconhece o numero real no prox estado
                 case 27:
@@ -428,7 +406,6 @@ public class Lexico {
                 case 28:
                     if(!Character.isDigit(c)){
                         pos--;
-                        colunaAtual = posFim;
                         return new Token(NUM_REAL, "NUM_REAL", lex, null);
                     }
                     else{
@@ -438,27 +415,22 @@ public class Lexico {
                 case 29:
                     posFim = pos - 1;
                     pos--;
-                    colunaAtual = posFim;
                     return new Token(ABRE_BLOCO, "ABRE_BLOCO", lex, null);
                 case 30:
                     posFim = pos - 1;
                     pos--;
-                    colunaAtual = posFim;
                     return new Token(ABRE_ARRAY, "ABRE_ARRAY", lex, null);
                 case 31:
                     posFim = pos - 1;
                     pos--;
-                    colunaAtual = posFim;
                     return new Token(FECHA_EXPR, "FECHA_EXPR", lex, null);
                 case 32:
                     posFim = pos - 1;
                     pos--;
-                    colunaAtual = posFim;
                     return new Token(FECHA_BLOCO, "FECHA_BLOCO", lex, null);
                 case 33:
                     posFim = pos - 1;
                     pos--;
-                    colunaAtual = posFim;
                     return new Token(FECHA_ARRAY, "FECHA_ARRAY", lex, null);
                 case 34:
                     posFim = pos - 1;
@@ -493,7 +465,6 @@ public class Lexico {
                 case 37:
                     posFim = pos - 1;
                     if(c == '\''){
-                        colunaAtual = posFim;
                         return new Token(CHAR, "CHAR", lex, null);
                     }
                     else{
@@ -515,7 +486,6 @@ public class Lexico {
         }
 
 		//fim do arquivo
-        colunaAtual = posFim;
         return new Token(EOF, "EOF", lex, null);
 	}
 
