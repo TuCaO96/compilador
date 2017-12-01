@@ -109,48 +109,12 @@ public class IDE extends JFrame implements ActionListener {
 				catch(Exception ex) {
 					JOptionPane.showMessageDialog(this, "Erro ao abrir arquivo.\n" + ex);
 				}
-			}   		
+			}
     	}
     	else if(e.getSource() == mnCompilar) {
 			msg.setText("Saída:");
-    		/*Lexico lex = new Lexico(editor, msg);
-            int token = lex.anaLex(), posSimbolo;
-            if(lex.TOKENS[token].equals("ID")){
-                if(lex.SYMBOLS.indexOf(lex.lex) != -1){
-                    posSimbolo = lex.SYMBOLS.indexOf(lex.lex);
-                }
-                else{
-                    lex.SYMBOLS.add(lex.lex);
-                    posSimbolo = lex.SYMBOLS.size() - 1;
-                }
-
-                msg.setText(msg.getText() + "\n <"+ lex.TOKENS[token] +", \"" + lex.lex + "\", " + posSimbolo + ">");
-            }
-            else{
-                if(!lex.TOKENS[token].equals("EOF")){
-                    msg.setText(msg.getText() + "\n <"+ lex.TOKENS[token] +", \"" + lex.lex + "\">");
-                }
-            }
-            while (!lex.TOKENS[token].equals("EOF")){
-                token = lex.anaLex();
-                //token 35 é o EOF
-                if(lex.TOKENS[token].equals("EOF")){
-                    break;
-                }
-                else if(lex.TOKENS[token].equals("ID")){
-                    if(lex.SYMBOLS.indexOf(lex.lex) != -1){
-                        posSimbolo = lex.SYMBOLS.indexOf(lex.lex);
-                    }
-                    else{
-                        lex.SYMBOLS.add(lex.lex);
-                        posSimbolo = lex.SYMBOLS.size() - 1;
-                    }
-                    msg.setText(msg.getText() + "\n <"+ lex.TOKENS[token] +", \"" + lex.lex + "\", " + posSimbolo + ">");
-                }
-                else{
-                    msg.setText(msg.getText() + "\n <"+ lex.TOKENS[token] +", \"" + lex.lex + "\">");
-                }
-            }*/
+			Parser parser = new Parser(editor, msg);
+			parser.execute();
             msg.setText(msg.getText() + "\n Fim da execução");
     	}
     	else if(e.getSource() == mnSair) {

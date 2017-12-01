@@ -2,8 +2,8 @@ import javax.smartcardio.ATR;
 import javax.swing.*;
 
 public class Parser {
-    private Lexico lex = new Lexico(this.editor, this.msg);
-    private Token token = lex.anaLex();
+    private Lexico lex;
+    private Token token;
     private JTextPane editor;
 
     private JTextPane msg;
@@ -19,7 +19,7 @@ public class Parser {
     }
 
     public void erro() {
-        System.out.println("Erro de sintaxe...");
+        this.msg.setText(this.msg.getText() + "\nErro sintático na coluna " + lex.posFim + ", na linha " + lex.linhaAtual + ".");
     }
 
     //S -> 'inicio' id BLOCO
@@ -350,13 +350,15 @@ public class Parser {
 
     }
 
-    public void main(String[] args){
+    public void execute(){
         S();
     }
 
-    public Parser(){
+    public Parser(JTextPane editor, JTextPane msg){
         this.editor = editor;
         this.msg = msg;
-        this.S();
+        lex = new Lexico(this.editor, this.msg);
+        token = lex.anaLex();
+        execute();
     }
 }
