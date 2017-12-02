@@ -5,7 +5,9 @@ public class Token {
 
     private String Lexema;
 
-    private String Classe;
+    private int Classe;
+
+    private int Tipo;
 
     public int getId() {
         return Id;
@@ -23,11 +25,11 @@ public class Token {
         Token = token;
     }
 
-    public String getClasse() {
+    public int getClasse() {
         return Classe;
     }
 
-    public void setClasse(String classe) {
+    public void setClasse(int classe) {
         Classe = classe;
     }
 
@@ -39,10 +41,19 @@ public class Token {
         Lexema = lexema;
     }
 
-    public Token(int id, String token, String lexema, String classe){
+    public int getTipo() {
+        return Tipo;
+    }
+
+    public void setTipo(int tipo) {
+        Tipo = tipo;
+    }
+
+    public Token(int id, String token, String lexema, int classe, int tipo){
         setId(id);
         setToken(token);
         setLexema(lexema);
         setClasse(classe);
+        setTipo(tipo);
     }
 }

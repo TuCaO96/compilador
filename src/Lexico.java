@@ -17,6 +17,14 @@ public class Lexico {
 
     private JTextPane msg;
 
+    //classes
+    public final int CLASS_NULL = -1;
+    public final int CLASS_VARIAVEL = 1;
+    public final int CLASS_ARRANJO = 2;
+    
+    //caso token nao tenha tipo
+    public final int TIPO_NULL = -1;
+    
     //tokens
     public final int TERM = 0;
     public final int ID = 1;
@@ -59,20 +67,21 @@ public class Lexico {
     public final int T_REAL = 38;
     public final int T_CARACTERE = 39;
     public final int T_BOOLEANO = 40;
-    public final int ENQUANTO = 41;
     public final int RETORNAR = 42;
     public final int CASO = 43;
     public final int PARAR = 44;
     public final int PADRAO = 45;
     public final int SWITCH = 46;
-    public final int CLASSE = 47;
-    public final int FUNCAO = 48;
+    public final int TRUE = 49;
+    public final int FALSE = 50;
+    public final int T_ARRAY = 51;
 
     public String[] TOKENS  = {"TERMINADOR", "ID", "NUM_INTEIRO", "NUM_REAL", "OP_SOMA", "OP_SUBTRAI", "OP_MULTIPLICA",
             "OP_POTENCIA", "OP_DIVISAO", "OP_IGUAL", "OP_OR", "OP_AND", "ABRE_ARRAY", "FECHA_ARRAY", "SEPARADOR",
             "ATRIB", "ABRE_BLOCO", "FECHA_BLOCO", "OP_MAIOR", "OP_MAIOR_IGUAL", "OP_MENOR", "OP_MENOR_IGUAL",
             "ABRE_EXPR", "FECHA_EXPR", "MOD", "DIFERENTE", "NEGA", "CHAR" ,"STRING", "INPUT", "OUTPUT", "WHILE",
-            "IF", "ELSE","EOF", "INICIO"
+            "IF", "ELSE","EOF", "INICIO", "T_INTEIRO", "T_LINHA", "T_REAL", "T_CARACTERE", "T_BOOLEANO", "ENQUANTO",
+            "RETORNAR", "TRUE", "FALSE", "T_ARRAY"
     };
 
     public ArrayList<Token> SYMBOLS = new ArrayList<>();
@@ -223,12 +232,12 @@ public class Lexico {
                     }
                     else{
                         pos--;
-                        return new Token(NUM_INTEIRO, "NUM_INTEIRO", lex, null);
+                        return new Token(NUM_INTEIRO, "NUM_INTEIRO", lex, CLASS_NULL, T_INTEIRO);
                     }
                     break;
                 case 2:
                     posFim = pos;
-                    if(Character.isLetter(c) || Character.isDigit(c)){
+                    if(Character.isLetter(c) || Character.isDigit(c) || c == '_'){
                         estado = 2;
                     }
                     else{
@@ -241,7 +250,7 @@ public class Lexico {
                             }
                         }
                         //se nao, adiciona o novo ID na tabela
-                        Token t = new Token(ID, "ID", lex, null);
+                        Token t = new Token(ID, "ID", lex, CLASS_VARIAVEL, 0);
                         SYMBOLS.add(t);
                         //e o retorna
                         return t;
@@ -255,7 +264,7 @@ public class Lexico {
                     }
                     else{
                         pos--;
-                        return new Token(NEGA, "NEGA", lex, null);
+                        return new Token(NEGA, "NEGA", lex, CLASS_NULL, TIPO_NULL);
                     }
                     break;
                 //reconhece o >
@@ -266,7 +275,7 @@ public class Lexico {
                     }
                     else{
                         pos--;
-                        return new Token(OP_MAIOR, "OP_MAIOR", lex, null);
+                        return new Token(OP_MAIOR, "OP_MAIOR", lex, CLASS_NULL, TIPO_NULL);
                     }
                     break;
                 //reconhece o <
@@ -283,7 +292,7 @@ public class Lexico {
                     }
                     else{
                         pos--;
-                        return new Token(OP_MENOR, "OP_MENOR", lex, null);
+                        return new Token(OP_MENOR, "OP_MENOR", lex, CLASS_NULL, TIPO_NULL);
                     }
                     break;
                 //reconhece o :
@@ -299,32 +308,32 @@ public class Lexico {
                 case 7:
                     posFim = pos - 1;
                     pos--;
-                    return new Token(OP_SOMA, "OP_SOMA", lex, null);
+                    return new Token(OP_SOMA, "OP_SOMA", lex, CLASS_NULL, TIPO_NULL);
                 //reconhece o -
                 case 8:
                     posFim = pos - 1;
                     pos--;
-                    return new Token(OP_SUBTRAI, "OP_SUBTRAI", lex, null);
+                    return new Token(OP_SUBTRAI, "OP_SUBTRAI", lex, CLASS_NULL, TIPO_NULL);
                 //reconhece o &
                 case 9:
                     posFim = pos - 1;
                     pos--;
-                    return new Token(OP_AND, "OP_AND", lex, null);
+                    return new Token(OP_AND, "OP_AND", lex, CLASS_NULL, TIPO_NULL);
                 //reconhece o |
                 case 10:
                     posFim = pos - 1;
                     pos--;
-                    return new Token(OP_OR, "OP_OR", lex, null);
+                    return new Token(OP_OR, "OP_OR", lex, CLASS_NULL, TIPO_NULL);
                 //reconhece o terminador
                 case 11:
                     posFim = pos - 1;
                     pos--;
-                    return new Token(TERM, "TERM", lex, null);
+                    return new Token(TERM, "TERM", lex, CLASS_NULL, TIPO_NULL);
                 //se vier um ), ele vai pro estado final de fecha expr
                 case 12:
                     posFim = pos - 1;
                     pos--;
-                    return new Token(ABRE_EXPR, "ABRE_EXPR", lex, null);
+                    return new Token(ABRE_EXPR, "ABRE_EXPR", lex, CLASS_NULL, TIPO_NULL);
                 //se vier outro ", ele vai pro estado final de fecha string
                 case 13:
                     posFim = pos;
@@ -338,7 +347,7 @@ public class Lexico {
                 //estado final de fecha string
                 case 14:
                     pos--;
-                    return new Token(STRING, "STRING", lex, null);
+                    return new Token(STRING, "STRING", lex, CLASS_NULL, T_LINHA);
                 case 15:
                     posFim = pos;
                     if(c == '\''){
@@ -350,16 +359,16 @@ public class Lexico {
                     break;
                 case 17:
                     pos--;
-                    return new Token(DIFERENTE, "DIFERENTE", lex, null);
+                    return new Token(DIFERENTE, "DIFERENTE", lex, CLASS_NULL, TIPO_NULL);
                 case 18:
                     pos--;
-                    return new Token(OP_MAIOR_IGUAL, "OP_MAIOR_IGUAL", lex, null);
+                    return new Token(OP_MAIOR_IGUAL, "OP_MAIOR_IGUAL", lex, CLASS_NULL, TIPO_NULL);
                 case 19:
                     pos--;
-                    return new Token(OP_MENOR_IGUAL, "OP_MENOR_IGUAL", lex, null);
+                    return new Token(OP_MENOR_IGUAL, "OP_MENOR_IGUAL", lex, CLASS_NULL, TIPO_NULL);
                 case 20:
                     pos--;
-                    return new Token(ATRIB, "ATRIB", lex, null);
+                    return new Token(ATRIB, "ATRIB", lex, CLASS_NULL, TIPO_NULL);
                 case 21:
                     posFim = pos - 1;
                     if(c == '*'){
@@ -367,32 +376,32 @@ public class Lexico {
                     }
                     else{
                         pos--;
-                        return new Token(OP_MULTIPLICA, "OP_MULTIPLICA", lex, null);
+                        return new Token(OP_MULTIPLICA, "OP_MULTIPLICA", lex, CLASS_NULL, TIPO_NULL);
                     }
                     break;
                 case 22:
                     pos--;
-                    return new Token(OP_POTENCIA, "OP_POTENCIA", lex, null);
+                    return new Token(OP_POTENCIA, "OP_POTENCIA", lex, CLASS_NULL, TIPO_NULL);
                 //reconhece o =
                 case 23:
                     posFim = pos - 1;
                     pos--;
-                    return new Token(OP_IGUAL, "OP_IGUAL", lex, null);
+                    return new Token(OP_IGUAL, "OP_IGUAL", lex, CLASS_NULL, TIPO_NULL);
                 //reconhece o /
                 case 24:
                     posFim = pos - 1;
                     pos--;
-                    return new Token(OP_DIVISAO, "OP_DIVISAO", lex, null);
+                    return new Token(OP_DIVISAO, "OP_DIVISAO", lex, CLASS_NULL, TIPO_NULL);
                 //reconhece o ,
                 case 25:
                     posFim = pos - 1;
                     pos--;
-                    return new Token(SEPARADOR, "SEPARADOR", lex, null);
+                    return new Token(SEPARADOR, "SEPARADOR", lex, CLASS_NULL, TIPO_NULL);
                 //reconhece o %
                 case 26:
                     posFim = pos - 1;
                     pos--;
-                    return new Token(MOD, "MOD", lex, null);
+                    return new Token(MOD, "MOD", lex, CLASS_NULL, TIPO_NULL);
                 //reconhece o numero real no prox estado
                 case 27:
                     posFim = pos - 1;
@@ -406,7 +415,7 @@ public class Lexico {
                 case 28:
                     if(!Character.isDigit(c)){
                         pos--;
-                        return new Token(NUM_REAL, "NUM_REAL", lex, null);
+                        return new Token(NUM_REAL, "NUM_REAL", lex, CLASS_NULL, T_REAL);
                     }
                     else{
                         estado = 28;
@@ -415,23 +424,23 @@ public class Lexico {
                 case 29:
                     posFim = pos - 1;
                     pos--;
-                    return new Token(ABRE_BLOCO, "ABRE_BLOCO", lex, null);
+                    return new Token(ABRE_BLOCO, "ABRE_BLOCO", lex, CLASS_NULL, TIPO_NULL);
                 case 30:
                     posFim = pos - 1;
                     pos--;
-                    return new Token(ABRE_ARRAY, "ABRE_ARRAY", lex, null);
+                    return new Token(ABRE_ARRAY, "ABRE_ARRAY", lex, CLASS_NULL, TIPO_NULL);
                 case 31:
                     posFim = pos - 1;
                     pos--;
-                    return new Token(FECHA_EXPR, "FECHA_EXPR", lex, null);
+                    return new Token(FECHA_EXPR, "FECHA_EXPR", lex, CLASS_NULL, TIPO_NULL);
                 case 32:
                     posFim = pos - 1;
                     pos--;
-                    return new Token(FECHA_BLOCO, "FECHA_BLOCO", lex, null);
+                    return new Token(FECHA_BLOCO, "FECHA_BLOCO", lex, CLASS_NULL, TIPO_NULL);
                 case 33:
                     posFim = pos - 1;
                     pos--;
-                    return new Token(FECHA_ARRAY, "FECHA_ARRAY", lex, null);
+                    return new Token(FECHA_ARRAY, "FECHA_ARRAY", lex, CLASS_NULL, TIPO_NULL);
                 case 34:
                     posFim = pos - 1;
                     if(c == '\n'){
@@ -465,7 +474,7 @@ public class Lexico {
                 case 37:
                     posFim = pos - 1;
                     if(c == '\''){
-                        return new Token(CHAR, "CHAR", lex, null);
+                        return new Token(CHAR, "CHAR", lex, CLASS_NULL, T_CARACTERE);
                     }
                     else{
                         erro(c);
@@ -482,11 +491,12 @@ public class Lexico {
         }
 
         if(estado == 13){
-            this.msg.setText(this.msg.getText() + "\nErro: Faltou fechar string na coluna " + posFim + ", na linha " + linhaAtual + ".");
+            this.msg.setText(this.msg.getText() + "\nErro léxico na coluna " + posFim + ", na linha " + linhaAtual + ": " +
+                    "faltou fechar linha");
         }
 
 		//fim do arquivo
-        return new Token(EOF, "EOF", lex, null);
+        return new Token(EOF, "EOF", lex, -1, -1);
 	}
 
 	public void erro(char c) {
@@ -499,24 +509,25 @@ public class Lexico {
 
         entrada = editor.getText() + "$";
 
-        SYMBOLS.add(new Token(29, "INPUT", "ler", null));
-        SYMBOLS.add(new Token(30, "OUTPUT", "escrever", null));
-        SYMBOLS.add(new Token(32, "SE", "se", null));
-        SYMBOLS.add(new Token(33, "SENAO", "senao", null));
-        SYMBOLS.add(new Token(35, "INICIO", "inicio", null));
-        SYMBOLS.add(new Token(36, "T_INTEIRO", "inteiro", null));
-        SYMBOLS.add(new Token(37, "T_LINHA", "linha", null));
-        SYMBOLS.add(new Token(38, "T_REAL", "real", null));
-        SYMBOLS.add(new Token(39, "T_CARACTERE", "caractere", null));
-        SYMBOLS.add(new Token(40, "T_BOOLEANO", "booleano", null));
-        SYMBOLS.add(new Token(41, "ENQUANTO", "enquanto", null));
-        SYMBOLS.add(new Token(42, "RETORNAR", "retornar", null));
-        SYMBOLS.add(new Token(43, "CASO", "caso", null));
-        SYMBOLS.add(new Token(44, "PARAR", "parar", null));
-        SYMBOLS.add(new Token(45, "PADRAO", "padrao", null));
-        SYMBOLS.add(new Token(46, "INTERRUPTOR", "interruptor", null));
-        SYMBOLS.add(new Token(47, "CLASSE", "classe", null));
-        SYMBOLS.add(new Token(48, "TRUE", "true", null));
-        SYMBOLS.add(new Token(49, "FALSE", "false", null));
+        SYMBOLS.add(new Token(29, "INPUT", "ler", CLASS_NULL, TIPO_NULL));
+        SYMBOLS.add(new Token(30, "OUTPUT", "escrever", CLASS_NULL, TIPO_NULL));
+        SYMBOLS.add(new Token(31, "ENQUANTO", "enquanto", CLASS_NULL, TIPO_NULL));
+        SYMBOLS.add(new Token(32, "SE", "se", CLASS_NULL, TIPO_NULL));
+        SYMBOLS.add(new Token(33, "SENAO", "senao", CLASS_NULL, TIPO_NULL));
+        SYMBOLS.add(new Token(35, "INICIO", "programa", CLASS_NULL, TIPO_NULL));
+        SYMBOLS.add(new Token(36, "T_INTEIRO", "inteiro", CLASS_NULL, TIPO_NULL));
+        SYMBOLS.add(new Token(37, "T_LINHA", "linha", CLASS_NULL, TIPO_NULL));
+        SYMBOLS.add(new Token(38, "T_REAL", "real", CLASS_NULL, TIPO_NULL));
+        SYMBOLS.add(new Token(39, "T_CARACTERE", "caractere", CLASS_NULL, TIPO_NULL));
+        SYMBOLS.add(new Token(40, "T_BOOLEANO", "booleano", CLASS_NULL, TIPO_NULL));
+        SYMBOLS.add(new Token(42, "RETORNAR", "retornar", CLASS_NULL, TIPO_NULL));
+        SYMBOLS.add(new Token(43, "CASO", "caso", CLASS_NULL, TIPO_NULL));
+        SYMBOLS.add(new Token(44, "PARAR", "parar", CLASS_NULL, TIPO_NULL));
+        SYMBOLS.add(new Token(45, "PADRAO", "padrao", CLASS_NULL, TIPO_NULL));
+        SYMBOLS.add(new Token(46, "INTERRUPTOR", "interruptor", CLASS_NULL, TIPO_NULL));
+        SYMBOLS.add(new Token(48, "FUNCAO", "funcao", CLASS_NULL, TIPO_NULL));
+        SYMBOLS.add(new Token(49, "TRUE", "verdadeiro", CLASS_NULL, T_BOOLEANO));
+        SYMBOLS.add(new Token(50, "FALSE", "falso", CLASS_NULL, T_BOOLEANO));
+        SYMBOLS.add(new Token(51, "T_ARRAY", "arranjo", CLASS_NULL, T_ARRAY));
     }
 }

@@ -1,3 +1,5 @@
+import com.sun.prism.shader.Solid_TextureYV12_Loader;
+
 import javax.smartcardio.ATR;
 import javax.swing.*;
 
@@ -5,33 +7,56 @@ public class Parser {
     private Lexico lex;
     private Token token;
     private JTextPane editor;
+    private boolean erro = false;
 
     private JTextPane msg;
 
-    public void casaToken(int tokenEsperado) {
+    public Token casaToken(int tokenEsperado) {
         if(token.getId() == tokenEsperado) {
             token = lex.anaLex();
+            return token;
         }
         else{
-            System.out.println("token:");
-            System.out.println(token.getId());
-            System.out.println("token esperado:");
-            System.out.println(tokenEsperado);
-            //adicionar token, ja que nao estara na tabela
-            erro();
+            if(token.getId() != lex.EOF){
+                erro("\nErro sintático na linha " + lex.linhaAtual + ": " +
+                        "esperava token " + tokenEsperado + " e foi encontrado " + token.getId());
+                token = lex.anaLex();
+            }
+            return null;
         }
     }
 
-    public void erro() {
-        System.out.println("posFim");
-        System.out.println(lex.posFim);
-        System.out.println("posIni");
-        System.out.println(lex.posIni);
-        System.out.println("linha atual");
-        System.out.println(lex.linhaAtual);
-        System.out.println("lexema");
-        System.out.println(lex.lex);
-        this.msg.setText(this.msg.getText() + "\nErro sintático na coluna " + lex.posFim + ", na linha " + lex.linhaAtual + ".");
+    public void erro(String msg) {
+        erro = true;
+        this.msg.setText(this.msg.getText() + msg);
+    }
+
+    //Define o tipo da variavel
+    public Token atribuiTipo(Token token, Token tipo){
+        if(tipo.getId() == lex.T_ARRAY){
+            token.setClasse(lex.CLASS_ARRANJO);
+            token.setTipo(lex.T_ARRAY);
+        }
+        else if(tipo.getId() == lex.T_BOOLEANO){
+            token.setTipo(lex.T_BOOLEANO);
+        }
+        else if(tipo.getId() == lex.T_CARACTERE){
+            token.setTipo(lex.T_CARACTERE);
+        }
+        else if(tipo.getId() == lex.T_LINHA){
+            token.setTipo(lex.T_LINHA);
+        }
+        else if(tipo.getId() == lex.T_REAL){
+            token.setTipo(lex.T_REAL);
+        }
+        else if(tipo.getId() == lex.T_INTEIRO){
+            token.setTipo(lex.T_INTEIRO);
+        }
+        else{
+            erro("\n Erro semântico: Tipo não reconhecido de variável na linha " + lex.linhaAtual);
+        }
+
+        return token;
     }
 
     //S -> 'inicio' id BLOCO
@@ -39,6 +64,7 @@ public class Parser {
         casaToken(lex.INICIO);
         casaToken(lex.ID);
         BLOCO();
+        this.msg.setText(this.msg.getText() + "\nCompilação executada com sucesso");
     }
 
     //BLOCO -> '{' CMD* '}'
@@ -49,13 +75,13 @@ public class Parser {
                 token.getId() == lex.T_INTEIRO || token.getId() == lex.T_BOOLEANO || 
                 token.getId() == lex.T_LINHA || token.getId() == lex.T_CARACTERE ||
                 token.getId() == lex.ABRE_BLOCO || token.getId() == lex.CASO || 
-                token.getId() == lex.PARAR){
+                token.getId() == lex.PARAR || token.getTipo() == lex.T_ARRAY){
             CMD();
         }
         casaToken(lex.FECHA_BLOCO);
     }
 
-    //CMD -> IF | WHILE | ATRIB | DECLAR | BLOCO | SWITCH | break ;
+    //CMD -> IF | WHILE | ATRIB | DECLAR | BLOCO | SWITCH | break; | retornar;
     private void CMD(){
         if(token.getId() == lex.IF){
             IF();
@@ -67,28 +93,36 @@ public class Parser {
             ATRIB();
         }
         else if(token.getId() == lex.T_INTEIRO || token.getId() == lex.T_BOOLEANO ||
-                token.getId() == lex.T_LINHA || token.getId() == lex.T_CARACTERE){
+                token.getId() == lex.T_LINHA || token.getId() == lex.T_CARACTERE || token.getTipo() == lex.T_ARRAY){
             DECLAR();
         }
         else if(token.getId() == lex.ABRE_BLOCO){
             BLOCO();
         }
         else if(token.getId() == lex.CASO){
-            CASO();
+            SWITCH();
         }
         else if(token.getId() == lex.PARAR){
             casaToken(lex.PARAR);
+            casaToken(lex.TERM);
         }
-        casaToken(lex.TERM);
+        else if(token.getId() == lex.RETORNAR){
+            casaToken(lex.RETORNAR);
+            casaToken(lex.TERM);
+        }
     }
 
-    //IF -> se '(' EXP ')' CMD
+    //IF -> se '(' EXP ')' CMD [senao CMD]
     private void IF(){
         casaToken(lex.IF);
         casaToken(lex.ABRE_EXPR);
         EXPR();
         casaToken(lex.FECHA_EXPR);
         CMD();
+        if(token.getId() == lex.ELSE){
+            casaToken(lex.ELSE);
+            CMD();
+        }
     }
 
     //WHILE -> enquanto '(' EXP ')' CMD
@@ -100,21 +134,103 @@ public class Parser {
         CMD();
     }
 
-    //DECLAR -> TIPO id {',' id}* 
+    //DECLAR -> TIPO id [:= EXP] {',' id [:= EXP]}* ';'
     private void DECLAR(){
+        //pega tipo
+        Token tipo = token;
+        //define se tipo é valido
         TIPO();
-        casaToken(lex.ID);
+        //pega id
+        Token id = token;
+        //define tipo pro id
+        if (casaToken(lex.ID) != null) atribuiTipo(id, tipo);
+        //se declaração tambem houver atribuição
+        if(token.getId() == lex.ATRIB){
+            casaToken(lex.ATRIB);
+            if(token.getId() == lex.ABRE_EXPR || token.getId() == lex.NEGA || token.getId() == lex.ID ||
+                    token.getId() == lex.NUM_INTEIRO || token.getId() == lex.NUM_REAL || token.getId() == lex.TRUE ||
+                    token.getId() == lex.FALSE || token.getId() == lex.STRING || token.getId() == lex.CHAR)
+            {
+                //se tipos forem diferentes, gera erro
+                if(tipo.getId() == lex.T_ARRAY){
+                    erro("\n Erro semântico: Variável "+id.getLexema()+" é de tipo diferente do atribuído" +
+                            "na linha" + lex.linhaAtual);
+                }
+                EXPR();
+            }
+            else if(token.getId() == lex.ABRE_ARRAY){
+                if(tipo.getId() != lex.T_ARRAY){
+                    erro("\n Erro semântico: Variável "+id.getLexema()+" é de tipo diferente do atribuído" +
+                            "na linha" + lex.linhaAtual);
+                }
+                ARRAY();
+            }
+        }
+
         while (token.getId() == lex.SEPARADOR){
             casaToken(lex.SEPARADOR);
             casaToken(lex.ID);
+            //se declaração tambem houver atribuição
+            if(token.getId() == lex.ATRIB){
+                casaToken(lex.ATRIB);
+                if(token.getId() == lex.ABRE_EXPR || token.getId() == lex.NEGA || token.getId() == lex.ID ||
+                        token.getId() == lex.NUM_INTEIRO || token.getId() == lex.NUM_REAL || token.getId() == lex.TRUE ||
+                        token.getId() == lex.FALSE || token.getId() == lex.STRING || token.getId() == lex.CHAR)
+                {
+                    //se tipos forem diferentes, gera erro
+                    if(tipo.getId() == lex.T_ARRAY){
+                        erro("\n Erro semântico: Variável "+id.getLexema()+" é de tipo diferente do atribuído");
+                    }
+                    EXPR();
+                }
+                else if(token.getId() == lex.ABRE_ARRAY){
+                    if(tipo.getId() != lex.T_ARRAY){
+                        erro("\n Erro semântico: Variável "+id.getLexema()+" é de tipo diferente do atribuído");
+                    }
+                    ARRAY();
+                }
+            }
+        }
+        //terminador
+        casaToken(lex.TERM);
+    }
+
+    //ATRIB -> id ':=' EXP ';' | id ':=' ARRAY ';'
+    private void ATRIB(){
+        Token id = token;
+        casaToken(lex.ID);
+        casaToken(lex.ATRIB);
+        if(token.getId() == lex.ABRE_EXPR || token.getId() == lex.NEGA || token.getId() == lex.ID ||
+                token.getId() == lex.NUM_INTEIRO || token.getId() == lex.NUM_REAL || token.getId() == lex.TRUE ||
+                token.getId() == lex.FALSE || token.getId() == lex.STRING || token.getId() == lex.CHAR)
+        {
+            //se tipos forem diferentes, gera erro
+            if(token.getTipo() == lex.T_ARRAY){
+                erro("\n Erro semântico: Variável "+id.getLexema()+" é de tipo diferente do atribuído");
+            }
+            EXPR();
+            casaToken(lex.TERM);
+        }
+        else if(token.getId() == lex.ABRE_ARRAY){
+            if(token.getTipo() != lex.T_ARRAY){
+                erro("\n Erro semântico: Variável "+id.getLexema()+" é de tipo diferente do atribuído");
+            }
+            ARRAY();
+            casaToken(lex.TERM);
         }
     }
 
-    //ATRIB -> id ':=' EXP
-    private void ATRIB(){
-        casaToken(lex.ID);
-        casaToken(lex.ATRIB);
-        EXPR();
+    //ARRAY -> '['LITERAL {',' LITERAL}*']'
+    private void ARRAY(){
+        casaToken(lex.ABRE_ARRAY);
+        LITERAL();
+        if(token.getId() == lex.SEPARADOR){
+            while (token.getId() == lex.SEPARADOR){
+                casaToken(lex.SEPARADOR);
+                LITERAL();
+            }
+        }
+        casaToken(lex.FECHA_ARRAY);
     }
 
     //EXPR -> EXPRS [ OP_REL EXPRS ]
@@ -145,7 +261,7 @@ public class Parser {
         }
     }
 
-    //FATOR -> '(' EXP ')' | !FATOR | id | num | true | false | string | read()
+    //FATOR -> '(' EXP ')' | !FATOR | id | num | true | false | string | READ
     private void FATOR(){
         if(token.getId() == lex.ABRE_EXPR){
             casaToken(lex.ABRE_EXPR);
@@ -167,10 +283,24 @@ public class Parser {
         else if(token.getId() == lex.STRING){
             casaToken(lex.STRING);
         }
-        else{
-            erro();
+        else if(token.getId() == lex.TRUE){
+            casaToken(lex.TRUE);
         }
-        //falta implementar read e true or false
+        else if(token.getId() == lex.FALSE){
+            casaToken(lex.FALSE);
+        }
+        else if(token.getId() == lex.INPUT){
+            LER();
+        }
+        else{
+            erro("\nErro sintático na linha " + lex.linhaAtual + ": regra inválida");
+        }
+    }
+    //READ -> ler()
+    private void LER(){
+        casaToken(lex.INPUT);
+        casaToken(lex.ABRE_EXPR);
+        casaToken(lex.FECHA_EXPR);
     }
 
     //OP_REL -> < | > | <= | >= | = | !=
@@ -187,9 +317,14 @@ public class Parser {
         else if(token.getId() == lex.OP_MAIOR_IGUAL){
             casaToken(lex.OP_MAIOR_IGUAL);
         }
-
+        else if(token.getId() == lex.OP_IGUAL){
+            casaToken(lex.OP_IGUAL);
+        }
+        else if(token.getId() == lex.DIFERENTE){
+            casaToken(lex.DIFERENTE);
+        }
         else{
-            erro();
+            erro("\nErro sintático na linha " + lex.linhaAtual + ": operador relacional inválido");
         }
     }
 
@@ -205,7 +340,7 @@ public class Parser {
             casaToken(lex.OP_OR);
         }
         else{
-            erro();
+            erro("\nErro sintático na linha " + lex.linhaAtual + ": operador de adição inválido");
         }
     }
 
@@ -221,7 +356,7 @@ public class Parser {
             casaToken(lex.OP_AND);
         }
         else{
-            erro();
+            erro("\nErro sintático na linha " + lex.linhaAtual + ": operador de multiplicação inválido");
         }
     }
 
@@ -261,74 +396,27 @@ public class Parser {
 
     //LITERAL -> num_real | num_int | string | char | booleano
     private void LITERAL(){
-        if(token.getId() == lex.T_REAL){
-            casaToken(lex.T_REAL);
+        if(token.getId() == lex.NUM_REAL){
+            casaToken(lex.NUM_REAL);
         }
-        else if(token.getId() == lex.T_INTEIRO){
-            casaToken(lex.T_INTEIRO);
+        else if(token.getId() == lex.NUM_INTEIRO){
+            casaToken(lex.NUM_INTEIRO);
         }
-        else if(token.getId() == lex.T_LINHA){
-            casaToken(lex.T_LINHA);
+        else if(token.getId() == lex.STRING){
+            casaToken(lex.STRING);
         }
-        else if(token.getId() == lex.T_CARACTERE){
-            casaToken(lex.T_CARACTERE);
+        else if(token.getId() == lex.CHAR){
+            casaToken(lex.CHAR);
         }
-        else if(token.getId() == lex.T_BOOLEANO){
-            casaToken(lex.T_BOOLEANO);
+        else if(token.getId() == lex.TRUE){
+            casaToken(lex.TRUE);
+        }
+        else if(token.getId() == lex.FALSE){
+            casaToken(lex.FALSE);
         }
         else{
-            erro();
+            erro("\nErro sintático na linha " + lex.linhaAtual + ": literal não reconhecido");
         }
-    }
-
-    //CLASSE -> classe id BLOCO_CLASSE
-    private void CLASSE(){
-        casaToken(lex.CLASSE);
-        casaToken(lex.ID);
-        BLOCO_CLASSE();
-    }
-
-    //BLOCO_CLASSE -> {ATRIB | DECLAR | FUNCAO}+
-    private void BLOCO_CLASSE(){
-        casaToken(lex.ABRE_BLOCO);
-        do{
-            if(token.getId() == lex.ID ){
-                ATRIB();
-            }
-            else if(token.getId() == lex.T_INTEIRO || token.getId() == lex.T_BOOLEANO ||
-                    token.getId() == lex.T_LINHA || token.getId() == lex.T_CARACTERE){
-                DECLAR();
-            }
-            else if(token.getId() == lex.FUNCAO){
-                FUNCAO();
-            }
-            else{
-                erro();
-            }
-        }
-        while (token.getId() != lex.FECHA_BLOCO);
-    }
-
-    //FUNCAO -> funcao id '('PARAMETRO [',' PARAMETRO]')' BLOCO
-    private void FUNCAO(){
-        casaToken(lex.FUNCAO);
-        casaToken(lex.ID);
-        casaToken(lex.ABRE_EXPR);
-        PARAMETRO();
-        if(token.getId() == lex.SEPARADOR){
-            while (token.getId() == lex.SEPARADOR){
-                casaToken(lex.SEPARADOR);
-                PARAMETRO();
-            }
-        }
-        casaToken(lex.FECHA_EXPR);
-        BLOCO();
-    }
-
-    //PARAMETRO -> TIPO id
-    private void PARAMETRO(){
-        TIPO();
-        casaToken(lex.ID);
     }
 
     //TIPO -> t_int, t_string, t_char, t_float, t_boolean
@@ -347,6 +435,9 @@ public class Parser {
         }
         else if(token.getId() == lex.T_REAL){
             casaToken(lex.T_REAL);
+        }
+        else if(token.getId() == lex.T_ARRAY){
+            casaToken(lex.T_ARRAY);
         }
     }
 
