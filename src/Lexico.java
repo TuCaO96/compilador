@@ -1,3 +1,4 @@
+import javax.swing.*;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -6,9 +7,17 @@ import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.regex.Pattern;
 
+/**
+ *  @author Arthur Mendonça Ribeiro
+ */
+
 public class Lexico {
-    //estados finais
-    public final int EOF = -1;
+
+    private JTextPane editor;
+
+    private JTextPane msg;
+
+    //tokens
     public final int TERM = 0;
     public final int ID = 1;
     public final int NUM_INTEIRO = 2;
@@ -38,87 +47,476 @@ public class Lexico {
     public final int NEGA = 26;
     public final int CHAR = 27;
     public final int STRING = 28;
-	//array de simbolos
-	ArrayList<Simbolo> simbolos;
+    public final int INPUT = 29;
+    public final int OUTPUT = 30;
+    public final int WHILE = 31;
+    public final int IF = 32;
+    public final int ELSE = 33;
+    public final int EOF = 34;
+    public final int INICIO = 35;
+    public final int T_INTEIRO = 36;
+    public final int T_LINHA = 37;
+    public final int T_REAL = 38;
+    public final int T_CARACTERE = 39;
+    public final int T_BOOLEANO = 40;
+    public final int ENQUANTO = 41;
+    public final int RETORNAR = 42;
+    public final int CASO = 43;
+    public final int PARAR = 44;
+    public final int PADRAO = 45;
+    public final int SWITCH = 46;
+    public final int CLASSE = 47;
+    public final int FUNCAO = 48;
 
-	int pos;
+    public String[] TOKENS  = {"TERMINADOR", "ID", "NUM_INTEIRO", "NUM_REAL", "OP_SOMA", "OP_SUBTRAI", "OP_MULTIPLICA",
+            "OP_POTENCIA", "OP_DIVISAO", "OP_IGUAL", "OP_OR", "OP_AND", "ABRE_ARRAY", "FECHA_ARRAY", "SEPARADOR",
+            "ATRIB", "ABRE_BLOCO", "FECHA_BLOCO", "OP_MAIOR", "OP_MAIOR_IGUAL", "OP_MENOR", "OP_MENOR_IGUAL",
+            "ABRE_EXPR", "FECHA_EXPR", "MOD", "DIFERENTE", "NEGA", "CHAR" ,"STRING", "INPUT", "OUTPUT", "WHILE",
+            "IF", "ELSE","EOF", "INICIO"
+    };
+
+    public ArrayList<Token> SYMBOLS = new ArrayList<>();
+
+	int posIni = 0, posFim = 0, pos = 0, linhaAtual = 1;
 
     String entrada;
 
-	public int anaLex() {
+    public String lex;
+
+	public Token anaLex() {
         int estado = 0;
 
 		while (pos < entrada.length()) {
-			char c = getCaracter(entrada);
-                        
-			System.out.println("[DEBUG] Caractere lido: " + c);
+            char c = entrada.charAt(pos++);
+//            this.msg.setText(this.msg.getText() + "\n[DEBUG] Caractere lido: " + c);
+//            this.msg.setText(this.msg.getText() + "\n[DEBUG] Estado final: " + estado);
+            //INICIO SWITCH DE ESTADOS
+            switch (estado) {
+                case 0:
+                    if (c == '\n') {
+                        linhaAtual++;
+                        estado = 0;
+                    }
+                    //ignora tabulação, o \r e espaço
+                    else if(c == '\t' || c == '\r' || c == ' '){
+                        estado = 0;
+                    }
+                    //se for numero
+                    else if (Character.isDigit(c)) {
+                        estado = 1;
+                        posIni = pos - 1;
+                        posFim = pos;
+                    }
+                    //se for letra
+                    else if (Character.isLetter(c)) {
+                        estado = 2;
+                        posIni = pos - 1;
+                        posFim = pos;
+                    }
+                    //vai pro estado nega, se vier depois um = vai pro diferente
+                    else if (c == '!') {
+                        estado = 3;
+                        posIni = pos - 1;
+                        posFim = pos;
+                    } else if (c == ':') {
+                        estado = 4;
+                        posIni = pos - 1;
+                        posFim = pos;
+                    } else if (c == '>') {
+                        estado = 5;
+                        posIni = pos - 1;
+                        posFim = pos;
+                    } else if (c == '<') {
+                        estado = 6;
+                        posIni = pos - 1;
+                        posFim = pos;
+                    } else if (c == '+') {
+                        estado = 7;
+                        posIni = pos - 1;
+                        posFim = pos;
+                    } else if (c == '-') {
+                        estado = 8;
+                        posIni = pos - 1;
+                        posFim = pos;
+                    } else if (c == '&') {
+                        estado = 9;
+                        posIni = pos - 1;
+                        posFim = pos;
+                    } else if (c == '|') {
+                        estado = 10;
+                        posIni = pos - 1;
+                        posFim = pos;
+                    } else if (c == ';') {
+                        estado = 11;
+                        posIni = pos - 1;
+                        posFim = pos;
+                    } else if (c == '(') {
+                        estado = 12;
+                        posIni = pos - 1;
+                        posFim = pos;
+                    } else if (c == '{') {
+                        estado = 29;
+                        posIni = pos - 1;
+                        posFim = pos;
+                    } else if (c == '[') {
+                        estado = 30;
+                        posIni = pos - 1;
+                        posFim = pos;
+                    } else if (c == '\"') {
+                        estado = 13;
+                        posIni = pos - 1;
+                        posFim = pos;
+                    } else if (c == '\'') {
+                        estado = 15;
+                        posIni = pos - 1;
+                        posFim = pos;
+                    } else if (c == '*') {
+                        estado = 21;
+                        posIni = pos - 1;
+                        posFim = pos;
+                    } else if (c == '=') {
+                        estado = 23;
+                        posIni = pos - 1;
+                        posFim = pos;
+                    } else if (c == '/') {
+                        estado = 24;
+                        posIni = pos - 1;
+                        posFim = pos;
+                    } else if (c == ',') {
+                        estado = 25;
+                        posIni = pos - 1;
+                        posFim = pos;
+                    } else if (c == '%') {
+                        estado = 26;
+                        posIni = pos - 1;
+                        posFim = pos;
+                    } else if (c == ')') {
+                        estado = 31;
+                        posIni = pos - 1;
+                        posFim = pos;
+                    } else if (c == '}') {
+                        estado = 32;
+                        posIni = pos - 1;
+                        posFim = pos;
+                    }else if (c == ']') {
+                        estado = 33;
+                        posIni = pos - 1;
+                        posFim = pos;
+                    }
+                    else if(c == '$'){
+                        //define inicio do novo lexema
+                        posIni = pos - 1;
+                        posFim = pos;
+                    }
+                    else{
+                        erro(c);
+                    }
 
-			//INICIO SWITCH DE ESTADOS
+                    break;
+                case 1:
+                    posFim = pos;
+                    if(Character.isDigit(c)){
+                        estado = 1;
+                    }
+                    else if(c == '.'){
+                        estado = 27;
+                    }
+                    else{
+                        pos--;
+                        return new Token(NUM_INTEIRO, "NUM_INTEIRO", lex, null);
+                    }
+                    break;
+                case 2:
+                    posFim = pos;
+                    if(Character.isLetter(c) || Character.isDigit(c)){
+                        estado = 2;
+                    }
+                    else{
+                        pos--;
+                        //procura se existe ID na tabela de simbolos
+                        //se sim, retorna o simbolo encontrado
+                        for(Token t : SYMBOLS){
+                            if(t.getLexema().equals(lex)){
+                                return t;
+                            }
+                        }
+                        //se nao, adiciona o novo ID na tabela
+                        Token t = new Token(ID, "ID", lex, null);
+                        SYMBOLS.add(t);
+                        //e o retorna
+                        return t;
+                    }
+                    break;
+                //reconhece o !
+                case 3:
+                    posFim = pos - 1;
+                    if(c == '='){
+                        estado = 17;
+                    }
+                    else{
+                        pos--;
+                        return new Token(NEGA, "NEGA", lex, null);
+                    }
+                    break;
+                //reconhece o >
+                case 5:
+                    posFim = pos - 1;
+                    if(c == '='){
+                        estado = 18;
+                    }
+                    else{
+                        pos--;
+                        return new Token(OP_MAIOR, "OP_MAIOR", lex, null);
+                    }
+                    break;
+                //reconhece o <
+                case 6:
+                    posFim = pos - 1;
+                    if(c == '='){
+                        estado = 19;
+                    }
+                    else if(c == '-'){
+                        estado = 34;
+                    }
+                    else if(c == ':'){
+                        estado = 35;
+                    }
+                    else{
+                        pos--;
+                        return new Token(OP_MENOR, "OP_MENOR", lex, null);
+                    }
+                    break;
+                //reconhece o :
+                case 4:
+                    posFim = pos;
+                    if(c == '='){
+                        estado = 20;
+                    }
+                    else
+                        erro(c);
+                    break;
+                //reconhece o +
+                case 7:
+                    posFim = pos - 1;
+                    pos--;
+                    return new Token(OP_SOMA, "OP_SOMA", lex, null);
+                //reconhece o -
+                case 8:
+                    posFim = pos - 1;
+                    pos--;
+                    return new Token(OP_SUBTRAI, "OP_SUBTRAI", lex, null);
+                //reconhece o &
+                case 9:
+                    posFim = pos - 1;
+                    pos--;
+                    return new Token(OP_AND, "OP_AND", lex, null);
+                //reconhece o |
+                case 10:
+                    posFim = pos - 1;
+                    pos--;
+                    return new Token(OP_OR, "OP_OR", lex, null);
+                //reconhece o terminador
+                case 11:
+                    posFim = pos - 1;
+                    pos--;
+                    return new Token(TERM, "TERM", lex, null);
+                //se vier um ), ele vai pro estado final de fecha expr
+                case 12:
+                    posFim = pos - 1;
+                    pos--;
+                    return new Token(ABRE_EXPR, "ABRE_EXPR", lex, null);
+                //se vier outro ", ele vai pro estado final de fecha string
+                case 13:
+                    posFim = pos;
+                    if(c == '\"'){
+                        estado = 14;
+                    }
+                    else{
+                        estado = 13;
+                    }
+                    break;
+                //estado final de fecha string
+                case 14:
+                    pos--;
+                    return new Token(STRING, "STRING", lex, null);
+                case 15:
+                    posFim = pos;
+                    if(c == '\''){
+                        erro(c);
+                    }
+                    else{
+                        estado = 37;
+                    }
+                    break;
+                case 17:
+                    pos--;
+                    return new Token(DIFERENTE, "DIFERENTE", lex, null);
+                case 18:
+                    pos--;
+                    return new Token(OP_MAIOR_IGUAL, "OP_MAIOR_IGUAL", lex, null);
+                case 19:
+                    pos--;
+                    return new Token(OP_MENOR_IGUAL, "OP_MENOR_IGUAL", lex, null);
+                case 20:
+                    pos--;
+                    return new Token(ATRIB, "ATRIB", lex, null);
+                case 21:
+                    posFim = pos - 1;
+                    if(c == '*'){
+                        estado = 22;
+                    }
+                    else{
+                        pos--;
+                        return new Token(OP_MULTIPLICA, "OP_MULTIPLICA", lex, null);
+                    }
+                    break;
+                case 22:
+                    pos--;
+                    return new Token(OP_POTENCIA, "OP_POTENCIA", lex, null);
+                //reconhece o =
+                case 23:
+                    posFim = pos - 1;
+                    pos--;
+                    return new Token(OP_IGUAL, "OP_IGUAL", lex, null);
+                //reconhece o /
+                case 24:
+                    posFim = pos - 1;
+                    pos--;
+                    return new Token(OP_DIVISAO, "OP_DIVISAO", lex, null);
+                //reconhece o ,
+                case 25:
+                    posFim = pos - 1;
+                    pos--;
+                    return new Token(SEPARADOR, "SEPARADOR", lex, null);
+                //reconhece o %
+                case 26:
+                    posFim = pos - 1;
+                    pos--;
+                    return new Token(MOD, "MOD", lex, null);
+                //reconhece o numero real no prox estado
+                case 27:
+                    posFim = pos - 1;
+                    if(Character.isDigit(c)){
+                        estado = 28;
+                    }
+                    else{
+                        erro(c);
+                    }
+                    break;
+                case 28:
+                    if(!Character.isDigit(c)){
+                        pos--;
+                        return new Token(NUM_REAL, "NUM_REAL", lex, null);
+                    }
+                    else{
+                        estado = 28;
+                    }
+                    break;
+                case 29:
+                    posFim = pos - 1;
+                    pos--;
+                    return new Token(ABRE_BLOCO, "ABRE_BLOCO", lex, null);
+                case 30:
+                    posFim = pos - 1;
+                    pos--;
+                    return new Token(ABRE_ARRAY, "ABRE_ARRAY", lex, null);
+                case 31:
+                    posFim = pos - 1;
+                    pos--;
+                    return new Token(FECHA_EXPR, "FECHA_EXPR", lex, null);
+                case 32:
+                    posFim = pos - 1;
+                    pos--;
+                    return new Token(FECHA_BLOCO, "FECHA_BLOCO", lex, null);
+                case 33:
+                    posFim = pos - 1;
+                    pos--;
+                    return new Token(FECHA_ARRAY, "FECHA_ARRAY", lex, null);
+                case 34:
+                    posFim = pos - 1;
+                    if(c == '\n'){
+                        estado = 0;
+                    }
+                    else{
+                        estado = 34;
+                    }
+                    break;
+                case 35:
+                    posFim = pos - 1;
+                    if(c == ':'){
+                        estado = 36;
+                    }
+                    else {
+                        estado = 35;
+                    }
+                    break;
+                case 36:
+                    posFim = pos - 1;
+                    if(c == ':'){
+                        estado = 36;
+                    }
+                    else if(c == '>'){
+                        estado = 0;
+                    }
+                    else {
+                        estado = 35;
+                    }
+                    break;
+                case 37:
+                    posFim = pos - 1;
+                    if(c == '\''){
+                        return new Token(CHAR, "CHAR", lex, null);
+                    }
+                    else{
+                        erro(c);
+                    }
+                    break;
+                default:
+                    erro(c);
+                    break;
+                //FIM SWITCH DE ESTADOS
+            }
 
-			//FIM SWITCH DE ESTADOS
+            lex = entrada.substring(posIni, posFim);
+//            this.msg.setText(this.msg.getText() + "\n[DEBUG] Lexema atual: " + lex);
+        }
 
-			String lex = entrada.substring(0, pos);
-		}
+        if(estado == 13){
+            this.msg.setText(this.msg.getText() + "\nErro: Faltou fechar string na coluna " + posFim + ", na linha " + linhaAtual + ".");
+        }
 
 		//fim do arquivo
-		return -1;
-	}
-
-	public char getCaracter(String entrada) {
-		return entrada.charAt(pos++);
+        return new Token(EOF, "EOF", lex, null);
 	}
 
 	public void erro(char c) {
-		System.out.println("Erro léxico na coluna " + pos + ", no caractere " + c + ".");
-	}
-	
-	public Lexico() {
-		int token;
-		token = anaLex();
-        while(token != -1){
-            token = anaLex();
-        }
-
+        this.msg.setText(this.msg.getText() + "\nErro léxico na coluna " + posFim + ", no caractere " + c + ", na linha " + linhaAtual + ".");
 	}
 
-	public ArrayList<Simbolo> initTabelaSimbolos(){
-		ArrayList<Simbolo> simbolos = new ArrayList<>();
+    public Lexico(JTextPane editor, JTextPane msg) {
+        this.editor = editor;
+        this.msg = msg;
 
-		try {
+        entrada = editor.getText() + "$";
 
-			File f = new File("src/com/mkyong/data.txt");
-
-			Scanner scan = new Scanner(f);
-
-			BufferedReader b = new BufferedReader(new FileReader(f));
-
-			String linha, posicao, token, lexema;
-
-			//delimitador para nova linha é o ;
-			scan.useDelimiter(Pattern.compile(";"));
-			while (scan.hasNext()) {
-				//proxima linha
-				linha = scan.next();
-				//dividimos a linha por cada virgula encontrada
-				String[] partes = linha.split(",");
-				//e entao salvamos cada informacao encontrada no objeto
-				Simbolo simbolo = new Simbolo();
-				simbolo.setPosicao(Integer.parseInt(partes[0]));
-				simbolo.setToken(partes[1]);
-				simbolo.setLexema(partes[2]);
-				//adiciona novo simbolo na tabela
-				simbolos.add(simbolo);
-			}
-
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
-		return simbolos;
-	}
-
-	public static void main(String[] args) {
-		new Lexico();
-	}
-
+        SYMBOLS.add(new Token(29, "INPUT", "ler", null));
+        SYMBOLS.add(new Token(30, "OUTPUT", "escrever", null));
+        SYMBOLS.add(new Token(32, "SE", "se", null));
+        SYMBOLS.add(new Token(33, "SENAO", "senao", null));
+        SYMBOLS.add(new Token(35, "INICIO", "inicio", null));
+        SYMBOLS.add(new Token(36, "T_INTEIRO", "inteiro", null));
+        SYMBOLS.add(new Token(37, "T_LINHA", "linha", null));
+        SYMBOLS.add(new Token(38, "T_REAL", "real", null));
+        SYMBOLS.add(new Token(39, "T_CARACTERE", "caractere", null));
+        SYMBOLS.add(new Token(40, "T_BOOLEANO", "booleano", null));
+        SYMBOLS.add(new Token(41, "ENQUANTO", "enquanto", null));
+        SYMBOLS.add(new Token(42, "RETORNAR", "retornar", null));
+        SYMBOLS.add(new Token(43, "CASO", "caso", null));
+        SYMBOLS.add(new Token(44, "PARAR", "parar", null));
+        SYMBOLS.add(new Token(45, "PADRAO", "padrao", null));
+        SYMBOLS.add(new Token(46, "INTERRUPTOR", "interruptor", null));
+        SYMBOLS.add(new Token(47, "CLASSE", "classe", null));
+        SYMBOLS.add(new Token(48, "TRUE", "true", null));
+        SYMBOLS.add(new Token(49, "FALSE", "false", null));
+    }
 }
