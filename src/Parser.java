@@ -76,7 +76,7 @@ public class Parser {
         while(token.getId() == lex.IF || token.getId() == lex.WHILE || token.getId() == lex.ID ||
                 token.getId() == lex.T_INTEIRO || token.getId() == lex.T_BOOLEANO || 
                 token.getId() == lex.T_LINHA || token.getId() == lex.T_CARACTERE ||
-                token.getId() == lex.ABRE_BLOCO || token.getId() == lex.CASO || 
+                token.getId() == lex.ABRE_BLOCO || token.getId() == lex.SWITCH ||
                 token.getId() == lex.PARAR || token.getTipo() == lex.T_ARRAY ||
                 token.getId() == lex.T_REAL || token.getId() == lex.OUTPUT){
             CMD();
@@ -389,7 +389,9 @@ public class Parser {
     private void BLOCO_SWITCH(){
         casaToken(lex.ABRE_BLOCO);
         while (token.getId() == lex.CASO){
-            CASO();
+            if(token.getId() == lex.CASO){
+                CASO();
+            }
         }
         if(token.getId() == lex.PADRAO){
             PADRAO();
