@@ -9,6 +9,8 @@ public class Token {
 
     private int Tipo;
 
+    private String Value;
+
     public int getId() {
         return Id;
     }
@@ -47,6 +49,14 @@ public class Token {
 
     public void setTipo(int tipo) {
         Tipo = tipo;
+    }
+
+    public String getValue() {
+        return Value;
+    }
+
+    public void setValue(String value) {
+        Value = value;
     }
 
     public Token(int id, String token, String lexema, int classe, int tipo){

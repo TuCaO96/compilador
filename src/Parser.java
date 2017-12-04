@@ -227,7 +227,7 @@ public class Parser {
             ARRAY();
         }
         else{
-            erro("\n Erro semântico: Variável " + id.getLexema() + " é de tipo diferente do atribuído " +
+            erro("\nErro semântico: Variável " + id.getLexema() + " é de tipo diferente do atribuído " +
                     "na linha " + lex.linhaAtual);
         }
         casaToken(lex.TERM);
