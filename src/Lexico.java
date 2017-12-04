@@ -97,8 +97,6 @@ public class Lexico {
 
 		while (pos < entrada.length()) {
             char c = entrada.charAt(pos++);
-//            this.msg.setText(this.msg.getText() + "\n[DEBUG] Caractere lido: " + c);
-//            this.msg.setText(this.msg.getText() + "\n[DEBUG] Estado final: " + estado);
             //INICIO SWITCH DE ESTADOS
             switch (estado) {
                 case 0:

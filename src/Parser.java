@@ -31,6 +31,11 @@ public class Parser {
         this.msg.setText(this.msg.getText() + msg);
     }
 
+    public Token atribuiValor(Token token, String valor){
+        token.setValue(valor);
+        return token;
+    }
+
     //Define o tipo da variavel
     public Token atribuiTipo(Token token, Token tipo){
         if(tipo.getId() == lex.T_ARRAY){
