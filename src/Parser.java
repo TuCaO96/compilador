@@ -59,12 +59,14 @@ public class Parser {
         return token;
     }
 
-    //S -> 'inicio' id BLOCO
+    //S -> 'programa' id BLOCO
     private void S(){
         casaToken(lex.INICIO);
         casaToken(lex.ID);
         BLOCO();
-        this.msg.setText(this.msg.getText() + "\nCompilação executada com sucesso");
+        if(!erro){
+            this.msg.setText(this.msg.getText() + "\nCompilação executada com sucesso");
+        }
     }
 
     //BLOCO -> '{' CMD* '}'
@@ -75,13 +77,14 @@ public class Parser {
                 token.getId() == lex.T_INTEIRO || token.getId() == lex.T_BOOLEANO || 
                 token.getId() == lex.T_LINHA || token.getId() == lex.T_CARACTERE ||
                 token.getId() == lex.ABRE_BLOCO || token.getId() == lex.CASO || 
-                token.getId() == lex.PARAR || token.getTipo() == lex.T_ARRAY){
+                token.getId() == lex.PARAR || token.getTipo() == lex.T_ARRAY ||
+                token.getId() == lex.T_REAL || token.getId() == lex.OUTPUT){
             CMD();
         }
         casaToken(lex.FECHA_BLOCO);
     }
 
-    //CMD -> IF | WHILE | ATRIB | DECLAR | BLOCO | SWITCH | break; | retornar;
+    //CMD -> IF | WHILE | ATRIB | DECLAR | BLOCO | SWITCH | escrever | break; | retornar;
     private void CMD(){
         if(token.getId() == lex.IF){
             IF();
@@ -92,7 +95,7 @@ public class Parser {
         else if(token.getId() == lex.ID){
             ATRIB();
         }
-        else if(token.getId() == lex.T_INTEIRO || token.getId() == lex.T_BOOLEANO ||
+        else if(token.getId() == lex.T_INTEIRO || token.getId() == lex.T_BOOLEANO || token.getId() == lex.T_REAL ||
                 token.getId() == lex.T_LINHA || token.getId() == lex.T_CARACTERE || token.getTipo() == lex.T_ARRAY){
             DECLAR();
         }
@@ -101,6 +104,9 @@ public class Parser {
         }
         else if(token.getId() == lex.SWITCH){
             SWITCH();
+        }
+        else if(token.getId() == lex.OUTPUT){
+            PRINT();
         }
         else if(token.getId() == lex.PARAR){
             casaToken(lex.PARAR);
@@ -146,7 +152,9 @@ public class Parser {
         //pega id
         Token id = token;
         //define tipo pro id
-        if (casaToken(lex.ID) != null) id = atribuiTipo(id, tipo);
+        if (casaToken(lex.ID) != null){
+            id = atribuiTipo(id, tipo);
+        }
         //se declaração tambem houver atribuição
         if(token.getId() == lex.ATRIB){
             casaToken(lex.ATRIB);
@@ -156,8 +164,10 @@ public class Parser {
             else if(tipo.getId() == lex.T_CARACTERE && token.getId() == lex.CHAR){
                 EXPR();
             }
-            else if((tipo.getId() == lex.T_REAL || tipo.getId() == lex.T_INTEIRO) &&
-                    (token.getId() != lex.STRING && token.getId() != lex.CHAR && token.getId() != lex.ABRE_ARRAY)){
+            else if(tipo.getId() == lex.T_REAL && token.getId() == lex.NUM_REAL){
+                EXPR();
+            }
+            else if(tipo.getId() == lex.T_INTEIRO && token.getId() == lex.NUM_INTEIRO){
                 EXPR();
             }
             else if(tipo.getId() == lex.T_ARRAY && token.getId() == lex.ABRE_ARRAY){
@@ -451,11 +461,14 @@ public class Parser {
     private void PRINT(){
         casaToken(lex.OUTPUT);
         EXPR();
+        casaToken(lex.TERM);
     }
 
     //READ -> ler()
     private void READ(){
-
+        casaToken(lex.INPUT);
+        casaToken(lex.ABRE_EXPR);
+        casaToken(lex.FECHA_EXPR);
     }
 
     public void execute(){
