@@ -99,7 +99,7 @@ public class Parser {
         else if(token.getId() == lex.ABRE_BLOCO){
             BLOCO();
         }
-        else if(token.getId() == lex.CASO){
+        else if(token.getId() == lex.SWITCH){
             SWITCH();
         }
         else if(token.getId() == lex.PARAR){
@@ -112,17 +112,20 @@ public class Parser {
         }
     }
 
-    //IF -> se '(' EXP ')' CMD [senao CMD]
+    //IF -> se '(' EXP ')' CMD {senao CMD}*
     private void IF(){
         casaToken(lex.IF);
         casaToken(lex.ABRE_EXPR);
         EXPR();
         casaToken(lex.FECHA_EXPR);
         CMD();
-        if(token.getId() == lex.ELSE){
-            casaToken(lex.ELSE);
-            CMD();
+        while(token.getId() == lex.ELSE){
+            if(token.getId() == lex.ELSE){
+                casaToken(lex.ELSE);
+                CMD();
+            }
         }
+
     }
 
     //WHILE -> enquanto '(' EXP ')' CMD
@@ -143,27 +146,26 @@ public class Parser {
         //pega id
         Token id = token;
         //define tipo pro id
-        if (casaToken(lex.ID) != null) atribuiTipo(id, tipo);
+        if (casaToken(lex.ID) != null) id = atribuiTipo(id, tipo);
         //se declaração tambem houver atribuição
         if(token.getId() == lex.ATRIB){
             casaToken(lex.ATRIB);
-            if(token.getId() == lex.ABRE_EXPR || token.getId() == lex.NEGA || token.getId() == lex.ID ||
-                    token.getId() == lex.NUM_INTEIRO || token.getId() == lex.NUM_REAL || token.getId() == lex.TRUE ||
-                    token.getId() == lex.FALSE || token.getId() == lex.STRING || token.getId() == lex.CHAR)
-            {
-                //se tipos forem diferentes, gera erro
-                if(tipo.getId() == lex.T_ARRAY){
-                    erro("\n Erro semântico: Variável "+id.getLexema()+" é de tipo diferente do atribuído" +
-                            "na linha" + lex.linhaAtual);
-                }
+            if(tipo.getId() == lex.T_LINHA && token.getId() == lex.STRING){
                 EXPR();
             }
-            else if(token.getId() == lex.ABRE_ARRAY){
-                if(tipo.getId() != lex.T_ARRAY){
-                    erro("\n Erro semântico: Variável "+id.getLexema()+" é de tipo diferente do atribuído" +
-                            "na linha" + lex.linhaAtual);
-                }
+            else if(tipo.getId() == lex.T_CARACTERE && token.getId() == lex.CHAR){
+                EXPR();
+            }
+            else if((tipo.getId() == lex.T_REAL || tipo.getId() == lex.T_INTEIRO) &&
+                    (token.getId() != lex.STRING && token.getId() != lex.CHAR && token.getId() != lex.ABRE_ARRAY)){
+                EXPR();
+            }
+            else if(tipo.getId() == lex.T_ARRAY && token.getId() == lex.ABRE_ARRAY){
                 ARRAY();
+            }
+            else{
+                erro("\n Erro semântico: Variável "+id.getLexema()+" é de tipo diferente do atribuído " +
+                        "na linha " + lex.linhaAtual);
             }
         }
 
@@ -173,21 +175,22 @@ public class Parser {
             //se declaração tambem houver atribuição
             if(token.getId() == lex.ATRIB){
                 casaToken(lex.ATRIB);
-                if(token.getId() == lex.ABRE_EXPR || token.getId() == lex.NEGA || token.getId() == lex.ID ||
-                        token.getId() == lex.NUM_INTEIRO || token.getId() == lex.NUM_REAL || token.getId() == lex.TRUE ||
-                        token.getId() == lex.FALSE || token.getId() == lex.STRING || token.getId() == lex.CHAR)
-                {
-                    //se tipos forem diferentes, gera erro
-                    if(tipo.getId() == lex.T_ARRAY){
-                        erro("\n Erro semântico: Variável "+id.getLexema()+" é de tipo diferente do atribuído");
-                    }
+                if(tipo.getId() == lex.T_LINHA && token.getId() == lex.STRING){
                     EXPR();
                 }
-                else if(token.getId() == lex.ABRE_ARRAY){
-                    if(tipo.getId() != lex.T_ARRAY){
-                        erro("\n Erro semântico: Variável "+id.getLexema()+" é de tipo diferente do atribuído");
-                    }
+                else if(tipo.getId() == lex.T_CARACTERE && token.getId() == lex.CHAR){
+                    EXPR();
+                }
+                else if((tipo.getId() == lex.T_REAL || tipo.getId() == lex.T_INTEIRO) &&
+                        (token.getId() != lex.STRING && token.getId() != lex.CHAR && token.getId() != lex.ABRE_ARRAY)){
+                    EXPR();
+                }
+                else if(tipo.getId() == lex.T_ARRAY && token.getId() == lex.ABRE_ARRAY){
                     ARRAY();
+                }
+                else{
+                    erro("\n Erro semântico: Variável "+id.getLexema()+" é de tipo diferente do atribuído " +
+                            "na linha " + lex.linhaAtual);
                 }
             }
         }
@@ -200,24 +203,24 @@ public class Parser {
         Token id = token;
         casaToken(lex.ID);
         casaToken(lex.ATRIB);
-        if(token.getId() == lex.ABRE_EXPR || token.getId() == lex.NEGA || token.getId() == lex.ID ||
-                token.getId() == lex.NUM_INTEIRO || token.getId() == lex.NUM_REAL || token.getId() == lex.TRUE ||
-                token.getId() == lex.FALSE || token.getId() == lex.STRING || token.getId() == lex.CHAR)
-        {
-            //se tipos forem diferentes, gera erro
-            if(token.getTipo() == lex.T_ARRAY){
-                erro("\n Erro semântico: Variável "+id.getLexema()+" é de tipo diferente do atribuído");
-            }
+        if(token.getTipo() == lex.T_LINHA && token.getId() == lex.STRING){
             EXPR();
-            casaToken(lex.TERM);
         }
-        else if(token.getId() == lex.ABRE_ARRAY){
-            if(token.getTipo() != lex.T_ARRAY){
-                erro("\n Erro semântico: Variável "+id.getLexema()+" é de tipo diferente do atribuído");
-            }
+        else if(token.getTipo() == lex.T_CARACTERE && token.getId() == lex.CHAR){
+            EXPR();
+        }
+        else if((token.getTipo() == lex.T_REAL || token.getTipo() == lex.T_INTEIRO) &&
+                (token.getId() != lex.STRING && token.getId() != lex.CHAR && token.getId() != lex.ABRE_ARRAY)){
+            EXPR();
+        }
+        else if(token.getTipo() == lex.T_ARRAY && token.getId() == lex.ABRE_ARRAY){
             ARRAY();
-            casaToken(lex.TERM);
         }
+        else{
+            erro("\n Erro semântico: Variável " + id.getLexema() + " é de tipo diferente do atribuído " +
+                    "na linha " + lex.linhaAtual);
+        }
+        casaToken(lex.TERM);
     }
 
     //ARRAY -> '['LITERAL {',' LITERAL}*']'
@@ -261,7 +264,7 @@ public class Parser {
         }
     }
 
-    //FATOR -> '(' EXP ')' | !FATOR | id | num | true | false | string | READ
+    //FATOR -> '(' EXP ')' | !FATOR | id | LITERAL | READ
     private void FATOR(){
         if(token.getId() == lex.ABRE_EXPR){
             casaToken(lex.ABRE_EXPR);
@@ -282,6 +285,9 @@ public class Parser {
         }
         else if(token.getId() == lex.STRING){
             casaToken(lex.STRING);
+        }
+        else if(token.getId() == lex.CHAR){
+            casaToken(lex.CHAR);
         }
         else if(token.getId() == lex.TRUE){
             casaToken(lex.TRUE);
