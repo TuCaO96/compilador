@@ -306,14 +306,14 @@ public class Parser {
             casaToken(lex.FALSE);
         }
         else if(token.getId() == lex.INPUT){
-            LER();
+            READ();
         }
         else{
             erro("\nErro sintático na linha " + lex.linhaAtual + ": regra inválida");
         }
     }
     //READ -> ler()
-    private void LER(){
+    private void READ(){
         casaToken(lex.INPUT);
         casaToken(lex.ABRE_EXPR);
         casaToken(lex.FECHA_EXPR);
@@ -462,13 +462,6 @@ public class Parser {
         casaToken(lex.OUTPUT);
         EXPR();
         casaToken(lex.TERM);
-    }
-
-    //READ -> ler()
-    private void READ(){
-        casaToken(lex.INPUT);
-        casaToken(lex.ABRE_EXPR);
-        casaToken(lex.FECHA_EXPR);
     }
 
     public void execute(){
