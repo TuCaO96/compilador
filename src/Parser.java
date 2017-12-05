@@ -1,7 +1,9 @@
+import com.sun.org.apache.xpath.internal.operations.Neg;
 import com.sun.prism.shader.Solid_TextureYV12_Loader;
 
 import javax.smartcardio.ATR;
 import javax.swing.*;
+import java.util.Scanner;
 
 public class Parser {
     private Lexico lex;
@@ -29,11 +31,6 @@ public class Parser {
     public void erro(String msg) {
         erro = true;
         this.msg.setText(this.msg.getText() + msg);
-    }
-
-    public Token atribuiValor(Token token, String valor){
-        token.setValue(valor);
-        return token;
     }
 
     //Define o tipo da variavel
@@ -149,7 +146,7 @@ public class Parser {
     }
 
     //DECLAR -> TIPO id [:= EXP] {',' id [:= EXP]}* ';'
-    private void DECLAR(){
+    private Token DECLAR(){
         //pega tipo
         Token tipo = token;
         //define se tipo é valido
@@ -163,24 +160,50 @@ public class Parser {
         //se declaração tambem houver atribuição
         if(token.getId() == lex.ATRIB){
             casaToken(lex.ATRIB);
-            if(tipo.getId() == lex.T_LINHA && token.getId() == lex.STRING){
-                EXPR();
+            if(token.getTipo() == lex.T_LINHA && token.getId() == lex.STRING){
+                Token tkn = EXPR();
+
+                if(tkn == null){
+                    erro("\nErro semântico: Não é possível realizar operações com token inválido");
+                    return null;
+                }
+
+                if(tkn.getTipo() != token.getTipo()){
+                    erro("\nErro semântico: Atribuição de tipo diferente da variável");
+                }
             }
-            else if(tipo.getId() == lex.T_CARACTERE && token.getId() == lex.CHAR){
-                EXPR();
+            else if(token.getTipo() == lex.T_CARACTERE && token.getId() == lex.CHAR){
+                Token tkn = EXPR();
+
+                if(tkn == null){
+                    erro("\nErro semântico: Não é possível realizar operações com token inválido");
+                    return null;
+                }
+
+                if(tkn.getTipo() != token.getTipo()){
+                    erro("\nErro semântico: Atribuição de tipo diferente da variável");
+                }
             }
-            else if(tipo.getId() == lex.T_REAL && token.getId() == lex.NUM_REAL){
-                EXPR();
+            else if((token.getTipo() == lex.T_REAL || token.getTipo() == lex.T_INTEIRO) &&
+                    (token.getId() != lex.STRING && token.getId() != lex.CHAR && token.getId() != lex.ABRE_ARRAY)){
+                Token tkn = EXPR();
+
+                if(tkn == null){
+                    erro("\nErro semântico: Não é possível realizar operações com token inválido");
+                    return null;
+                }
+
+                if(tkn.getTipo() != id.getTipo()){
+                    erro("\nErro semântico: Atribuição de tipo diferente da variável");
+                }
             }
-            else if(tipo.getId() == lex.T_INTEIRO && token.getId() == lex.NUM_INTEIRO){
-                EXPR();
-            }
-            else if(tipo.getId() == lex.T_ARRAY && token.getId() == lex.ABRE_ARRAY){
+            else if(token.getTipo() == lex.T_ARRAY && token.getId() == lex.ABRE_ARRAY){
                 ARRAY();
             }
             else{
-                erro("\n Erro semântico: Variável "+id.getLexema()+" é de tipo diferente do atribuído " +
+                erro("\nErro semântico: Variável " + id.getLexema() + " é de tipo diferente do atribuído " +
                         "na linha " + lex.linhaAtual);
+                return null;
             }
         }
 
@@ -211,22 +234,51 @@ public class Parser {
         }
         //terminador
         casaToken(lex.TERM);
+
+        return id;
     }
 
     //ATRIB -> id ':=' EXP ';' | id ':=' ARRAY ';'
-    private void ATRIB(){
+    private Token ATRIB(){
         Token id = token;
         casaToken(lex.ID);
         casaToken(lex.ATRIB);
         if(token.getTipo() == lex.T_LINHA && token.getId() == lex.STRING){
-            EXPR();
+            Token tkn = EXPR();
+
+            if(tkn == null){
+                erro("\nErro semântico: Não é possível realizar operações com token inválido");
+                return null;
+            }
+
+            if(tkn.getTipo() != token.getTipo()){
+                erro("\nErro semântico: Atribuição de tipo diferente da variável");
+            }
         }
         else if(token.getTipo() == lex.T_CARACTERE && token.getId() == lex.CHAR){
-            EXPR();
+            Token tkn = EXPR();
+
+            if(tkn == null){
+                erro("\nErro semântico: Não é possível realizar operações com token inválido");
+                return null;
+            }
+
+            if(tkn.getTipo() != token.getTipo()){
+                erro("\nErro semântico: Atribuição de tipo diferente da variável");
+            }
         }
         else if((token.getTipo() == lex.T_REAL || token.getTipo() == lex.T_INTEIRO) &&
                 (token.getId() != lex.STRING && token.getId() != lex.CHAR && token.getId() != lex.ABRE_ARRAY)){
-            EXPR();
+            Token tkn = EXPR();
+
+            if(tkn == null){
+                erro("\nErro semântico: Não é possível realizar operações com token inválido");
+                return null;
+            }
+
+            if(tkn.getTipo() != token.getTipo()){
+                erro("\nErro semântico: Atribuição de tipo diferente da variável");
+            }
         }
         else if(token.getTipo() == lex.T_ARRAY && token.getId() == lex.ABRE_ARRAY){
             ARRAY();
@@ -234,14 +286,16 @@ public class Parser {
         else{
             erro("\nErro semântico: Variável " + id.getLexema() + " é de tipo diferente do atribuído " +
                     "na linha " + lex.linhaAtual);
+            return null;
         }
         casaToken(lex.TERM);
+        return id;
     }
 
     //ARRAY -> '['LITERAL {',' LITERAL}*']'
-    private void ARRAY(){
+    private Token ARRAY(){
         casaToken(lex.ABRE_ARRAY);
-        LITERAL();
+        Token tkn = LITERAL();
         if(token.getId() == lex.SEPARADOR){
             while (token.getId() == lex.SEPARADOR){
                 casaToken(lex.SEPARADOR);
@@ -249,136 +303,404 @@ public class Parser {
             }
         }
         casaToken(lex.FECHA_ARRAY);
+        return tkn;
     }
 
     //EXPR -> EXPRS [ OP_REL EXPRS ]
-    private void EXPR(){
-        EXPRS();
+    private Token EXPR(){
+        Token tkn = EXPRS();
+        //verifica o tipo do token e cria variavel pra receber resultado de acordo com isso
+        if(tkn == null){
+            erro("\nErro semântico: Não é possível realizar operações com token inválido");
+            return null;
+        }
+        
         if(token.getId() == lex.OP_IGUAL || token.getId() == lex.DIFERENTE || token.getId() == lex.OP_MENOR_IGUAL ||
                 token.getId() == lex.OP_MENOR || token.getId() == lex.OP_MAIOR_IGUAL || token.getId() == lex.OP_MAIOR){
-            OP_REL();
-            EXPRS();
+            Token operador = OP_REL();
+            Token tkn2 = EXPRS();
+
+            if(operador == null || tkn2 == null){
+                erro("\nErro semântico: Não é possível realizar operações com token inválido");
+                return null;
+            }
+            else if(tkn2.getTipo() != tkn.getTipo()){
+                erro("\nErro semântico: Não é possível mesclar valores de tokens de tipos diferentes");
+                return null;
+            }
+
+            //pega de acordo com os tipos das variaveis o resultado
+            //e realiza operações de acordo com qual for o operador
+            if(tkn.getTipo() == lex.T_INTEIRO){
+                boolean resultado = false;
+
+                if(operador.getId() == lex.OP_MAIOR){
+                    resultado = Integer.parseInt(tkn.getLexema()) > Integer.parseInt(tkn2.getLexema());
+                }
+                else if(operador.getId() == lex.OP_MAIOR_IGUAL){
+                    resultado = Integer.parseInt(tkn.getLexema()) >= Integer.parseInt(tkn2.getLexema());
+                }
+                else if(operador.getId() == lex.OP_MENOR){
+                    resultado = Integer.parseInt(tkn.getLexema()) < Integer.parseInt(tkn2.getLexema());
+                }
+                else if(operador.getId() == lex.OP_MENOR_IGUAL){
+                    resultado = Integer.parseInt(tkn.getLexema()) <= Integer.parseInt(tkn2.getLexema());
+                }
+                else if(operador.getId() == lex.OP_IGUAL){
+                    resultado = Integer.parseInt(tkn.getLexema()) == Integer.parseInt(tkn2.getLexema());
+                }
+                else if(operador.getId() == lex.DIFERENTE){
+                    resultado = Integer.parseInt(tkn.getLexema()) != Integer.parseInt(tkn2.getLexema());
+                }
+                else{
+                    erro("\nErro semântico: Operador inválido");
+                    return null;
+                }
+                
+                if(resultado){
+                    return new Token(lex.TRUE, "BOOLEANO", Boolean.toString(resultado), -1, lex.T_BOOLEANO);
+                }
+                else{
+                    return new Token(lex.FALSE, "BOOLEANO", Boolean.toString(resultado), -1, lex.T_BOOLEANO);
+                }
+                
+            }
+
+            else if(tkn.getTipo() == lex.T_REAL){
+                boolean resultado = false;
+
+                if(operador.getId() == lex.OP_MAIOR){
+                    resultado = Float.parseFloat(tkn.getLexema()) > Float.parseFloat(tkn2.getLexema());
+                }
+                else if(operador.getId() == lex.OP_MAIOR_IGUAL){
+                    resultado = Float.parseFloat(tkn.getLexema()) >= Float.parseFloat(tkn2.getLexema());
+                }
+                else if(operador.getId() == lex.OP_MENOR){
+                    resultado = Float.parseFloat(tkn.getLexema()) < Float.parseFloat(tkn2.getLexema());
+                }
+                else if(operador.getId() == lex.OP_MENOR_IGUAL){
+                    resultado = Float.parseFloat(tkn.getLexema()) <= Float.parseFloat(tkn2.getLexema());
+                }
+                else if(operador.getId() == lex.OP_IGUAL){
+                    resultado = Float.parseFloat(tkn.getLexema()) == Float.parseFloat(tkn2.getLexema());
+                }
+                else if(operador.getId() == lex.DIFERENTE){
+                    resultado = Float.parseFloat(tkn.getLexema()) != Float.parseFloat(tkn2.getLexema());
+                }
+                else{
+                    erro("\nErro semântico: Operador inválido");
+                }
+
+                if(resultado){
+                    return new Token(lex.TRUE, "BOOLEANO", Boolean.toString(resultado), -1, lex.T_BOOLEANO);
+                }
+                else{
+                    return new Token(lex.FALSE, "BOOLEANO", Boolean.toString(resultado), -1, lex.T_BOOLEANO);
+                }
+            }
+            else{
+                erro("\nErro semântico: Operação não permitida com o tipo de variável passado");
+            }
         }
+        return tkn;
     }
 
     //EXPRS -> TERMO { OP_AD TERMO}*
-    private void EXPRS(){
-        TERMO();
-        while (token.getId() == lex.OP_SOMA || token.getId() == lex.OP_SUBTRAI || token.getId() == lex.OP_OR){
-            OP_AD();
-            TERMO();
+    private Token EXPRS(){
+        Token tkn = TERMO();
+        //verifica o tipo do token e cria variavel pra receber resultado de acordo com isso
+        if(tkn == null){
+            System.out.println("1");
+            erro("\nErro semântico: Não é possível realizar operações com token inválido");
+            return null;
         }
+
+        while (token.getId() == lex.OP_SOMA || token.getId() == lex.OP_SUBTRAI || token.getId() == lex.OP_OR){
+            Token operador = OP_AD();
+            Token tkn2 = TERMO();
+
+            if(operador == null || tkn2 == null){
+                erro("\nErro semântico: Não é possível realizar operações com token inválido");
+                System.out.println("2");
+                return null;
+            }
+            else if(tkn2.getTipo() != tkn.getTipo()){
+                erro("\nErro semântico: Não é possível mesclar valores de tokens de tipos diferentes");
+            }
+
+            //pega de acordo com os tipos das variaveis o resultado
+            //e realiza operações de acordo com qual for o operador
+            if(tkn.getTipo() == lex.T_INTEIRO){
+                int resultado = Integer.parseInt(tkn.getLexema());
+
+                if(operador.getId() == lex.OP_SOMA){
+                    resultado = resultado + Integer.parseInt(tkn2.getLexema());
+                }
+                else if(operador.getId() == lex.OP_SUBTRAI){
+                    resultado = resultado - Integer.parseInt(tkn2.getLexema());
+                }
+                else{
+                    erro("\nErro semântico: Operador inválido");
+                }
+                return new Token(lex.NUM_INTEIRO, "INTEIRO", Integer.toString(resultado), -1, lex.T_INTEIRO);
+            }
+
+            else if(tkn.getTipo() == lex.T_REAL){
+                float resultado = Float.parseFloat(tkn.getLexema());
+
+                if(operador.getId() == lex.OP_SOMA){
+                    resultado = resultado + Float.parseFloat(tkn2.getLexema());
+                }
+                else if(operador.getId() == lex.OP_SUBTRAI){
+                    resultado = resultado - Float.parseFloat(tkn2.getLexema());
+                }
+                else{
+                    erro("\nErro semântico: Operador inválido");
+                }
+                return new Token(lex.NUM_REAL, "REAL", Float.toString(resultado), -1, lex.T_REAL);
+            }
+
+            else if(tkn.getTipo() == lex.T_BOOLEANO){
+                boolean resultado = Boolean.parseBoolean(tkn.getLexema());
+
+                if(operador.getId() == lex.OP_OR){
+                    resultado = resultado || Boolean.parseBoolean(tkn2.getLexema());
+                }
+                else{
+                    erro("\nErro semântico: Operador inválido");
+                }
+                return new Token(lex.NUM_REAL, "BOOLEANO", Boolean.toString(resultado), -1, lex.T_REAL);
+            }
+            else{
+                erro("\nErro semântico: Operação não permitida com o tipo de variável passado");
+            }
+        }
+
+        return tkn;
     }
 
     //TERMO -> FATOR {OP_MULT FATOR}*
-    private void TERMO(){
-        FATOR();
-        while (token.getId() == lex.OP_MULTIPLICA || token.getId() == lex.OP_DIVISAO || token.getId() == lex.OP_AND){
-            OP_MULT();
-            FATOR();
+    private Token TERMO(){
+        Token tkn = FATOR();
+
+        //verifica o tipo do token e cria variavel pra receber resultado de acordo com isso
+        if(tkn == null){
+            erro("\nErro semântico: Não é possível realizar operações com token inválido");
+            System.out.println("3");
+            return null;
         }
+
+        while (token.getId() == lex.OP_MULTIPLICA || token.getId() == lex.OP_DIVISAO || token.getId() == lex.OP_AND){
+            Token operador = OP_MULT();
+            Token tkn2 = FATOR();
+
+            if(operador == null || tkn2 == null){
+                erro("\nErro semântico: Não é possível realizar operações com token inválido");
+                return null;
+            }
+            else if(tkn2.getTipo() != tkn.getTipo()){
+                erro("\nErro semântico: Não é possível mesclar valores de tokens de tipos diferentes");
+            }
+
+            //pega de acordo com os tipos das variaveis o resultado
+            //e realiza operações de acordo com qual for o operador
+            if(tkn.getTipo() == lex.T_INTEIRO){
+                int resultado = Integer.parseInt(tkn.getLexema());
+
+                if(operador.getId() == lex.OP_MULTIPLICA){
+                    resultado = resultado * Integer.parseInt(tkn2.getLexema());
+                }
+                else if(operador.getId() == lex.OP_DIVISAO){
+                    resultado = resultado / Integer.parseInt(tkn2.getLexema());
+                }
+                else{
+                    erro("\nErro semântico: Operador inválido");
+                }
+                return new Token(lex.NUM_INTEIRO, "INTEIRO", Integer.toString(resultado), -1, lex.T_INTEIRO);
+            }
+
+            else if(tkn.getTipo() == lex.T_REAL){
+                float resultado = Float.parseFloat(tkn.getLexema());
+
+                if(operador.getId() == lex.OP_MULTIPLICA){
+                    resultado = resultado * Float.parseFloat(tkn2.getLexema());
+                }
+                else if(operador.getId() == lex.OP_DIVISAO){
+                    resultado = resultado / Float.parseFloat(tkn2.getLexema());
+                }
+                else{
+                    erro("\nErro semântico: Operador inválido");
+                }
+                return new Token(lex.NUM_REAL, "REAL", Float.toString(resultado), -1, lex.T_REAL);
+            }
+
+            else if(tkn.getTipo() == lex.T_BOOLEANO){
+                boolean resultado = Boolean.parseBoolean(tkn.getLexema());
+
+                if(operador.getId() == lex.OP_AND){
+                    resultado = resultado && Boolean.parseBoolean(tkn2.getLexema());
+                }
+                else{
+                    erro("\nErro semântico: Operador inválido");
+                }
+                return new Token(lex.NUM_REAL, "BOOLEANO", Boolean.toString(resultado), -1, lex.T_REAL);
+            }
+            else{
+                erro("\nErro semântico: Operação não permitida com o tipo de variável passado");
+            }
+        }
+        return tkn;
     }
 
     //FATOR -> '(' EXP ')' | !FATOR | id | LITERAL | READ
-    private void FATOR(){
+    private Token FATOR(){
         if(token.getId() == lex.ABRE_EXPR){
             casaToken(lex.ABRE_EXPR);
-            EXPR();
+            Token tk = EXPR();
             casaToken(lex.FECHA_EXPR);
+            return tk;
         }
         else if(token.getId() == lex.NEGA){
-            FATOR();
+            casaToken(lex.NEGA);
+            Token tk = FATOR();
+            return tk;
         }
         else if(token.getId() == lex.ID){
+            Token tk = token;
             casaToken(lex.ID);
+            return tk;
         }
         else if(token.getId() == lex.NUM_INTEIRO){
+            Token tk = token;
             casaToken(lex.NUM_INTEIRO);
+            return tk;
         }
         else if(token.getId() == lex.NUM_REAL){
+            Token tk = token;
             casaToken(lex.NUM_REAL);
+            return tk;
         }
         else if(token.getId() == lex.STRING){
+            Token tk = token;
             casaToken(lex.STRING);
+            return tk;
         }
         else if(token.getId() == lex.CHAR){
+            Token tk = token;
             casaToken(lex.CHAR);
+            return tk;
         }
         else if(token.getId() == lex.TRUE){
+            Token tk = token;
             casaToken(lex.TRUE);
+            return tk;
         }
         else if(token.getId() == lex.FALSE){
+            Token tk = token;
             casaToken(lex.FALSE);
+            return tk;
         }
         else if(token.getId() == lex.INPUT){
-            READ();
+            return READ();
         }
         else{
             erro("\nErro sintático na linha " + lex.linhaAtual + ": regra inválida");
         }
+        return null;
     }
     //READ -> ler()
-    private void READ(){
+    private Token READ(){
         casaToken(lex.INPUT);
         casaToken(lex.ABRE_EXPR);
         casaToken(lex.FECHA_EXPR);
+        Scanner s = new Scanner(System.in);
+        String input = s.nextLine();
+        return new Token(lex.INPUT,"INPUT", input, -1, -1);
     }
 
     //OP_REL -> < | > | <= | >= | = | !=
-    private void OP_REL(){
+    private Token OP_REL(){
         if(token.getId() == lex.OP_MENOR){
+            Token tk = token;
             casaToken(lex.OP_MENOR);
+            return tk;
         }
         else if(token.getId() == lex.OP_MENOR_IGUAL){
+            Token tk = token;
             casaToken(lex.OP_MENOR_IGUAL);
+            return tk;
         }
         else if(token.getId() == lex.OP_MAIOR){
+            Token tk = token;
             casaToken(lex.OP_MAIOR);
+            return tk;
         }
         else if(token.getId() == lex.OP_MAIOR_IGUAL){
+            Token tk = token;
             casaToken(lex.OP_MAIOR_IGUAL);
+            return tk;
         }
         else if(token.getId() == lex.OP_IGUAL){
+            Token tk = token;
             casaToken(lex.OP_IGUAL);
+            return tk;
         }
         else if(token.getId() == lex.DIFERENTE){
+            Token tk = token;
             casaToken(lex.DIFERENTE);
+            return tk;
         }
         else{
             erro("\nErro sintático na linha " + lex.linhaAtual + ": operador relacional inválido");
         }
+        return null;
     }
 
     //OP_AD -> + | - | '|'
-    private void OP_AD(){
+    private Token OP_AD(){
         if(token.getId() == lex.OP_SOMA){
+            Token tk = token;
             casaToken(lex.OP_SOMA);
+            return tk;
         }
         else if(token.getId() == lex.OP_SUBTRAI){
+            Token tk = token;
             casaToken(lex.OP_SUBTRAI);
+            return tk;
         }
         else if(token.getId() == lex.OP_OR){
+            Token tk = token;
             casaToken(lex.OP_OR);
+            return tk;
         }
         else{
             erro("\nErro sintático na linha " + lex.linhaAtual + ": operador de adição inválido");
         }
+
+        return null;
     }
 
     //OP_MULT -> * | / | &
-    private void OP_MULT(){
+    private Token OP_MULT(){
         if(token.getId() == lex.OP_MULTIPLICA){
+            Token tk = token;
             casaToken(lex.OP_MULTIPLICA);
+            return tk;
         }
         else if(token.getId() == lex.OP_DIVISAO){
+            Token tk = token;
             casaToken(lex.OP_DIVISAO);
+            return tk;
         }
         else if(token.getId() == lex.OP_AND){
+            Token tk = token;
             casaToken(lex.OP_AND);
+            return tk;
         }
         else{
             erro("\nErro sintático na linha " + lex.linhaAtual + ": operador de multiplicação inválido");
         }
+        return null;
     }
 
     //SWITCH -> interruptor '('id')' BLOCO_SWITCH
@@ -418,28 +740,29 @@ public class Parser {
     }
 
     //LITERAL -> num_real | num_int | string | char | booleano
-    private void LITERAL(){
+    private Token LITERAL(){
         if(token.getId() == lex.NUM_REAL){
-            casaToken(lex.NUM_REAL);
+            return casaToken(lex.NUM_REAL);
         }
         else if(token.getId() == lex.NUM_INTEIRO){
-            casaToken(lex.NUM_INTEIRO);
+            return casaToken(lex.NUM_INTEIRO);
         }
         else if(token.getId() == lex.STRING){
-            casaToken(lex.STRING);
+            return casaToken(lex.STRING);
         }
         else if(token.getId() == lex.CHAR){
-            casaToken(lex.CHAR);
+            return casaToken(lex.CHAR);
         }
         else if(token.getId() == lex.TRUE){
-            casaToken(lex.TRUE);
+            return casaToken(lex.TRUE);
         }
         else if(token.getId() == lex.FALSE){
-            casaToken(lex.FALSE);
+            return casaToken(lex.FALSE);
         }
         else{
             erro("\nErro sintático na linha " + lex.linhaAtual + ": literal não reconhecido");
         }
+        return null;
     }
 
     //TIPO -> t_int, t_string, t_char, t_float, t_boolean
