@@ -114,7 +114,6 @@ public class IDE extends JFrame implements ActionListener {
     	else if(e.getSource() == mnCompilar) {
     		msg.setText(null);
 			Parser parser = new Parser(editor, msg);
-			parser.execute();
     	}
     	else if(e.getSource() == mnSair) {
     		System.exit(0);    		

@@ -426,7 +426,7 @@ public class Lexico {
                 case 30:
                     posFim = pos - 1;
                     pos--;
-                    return new Token(ABRE_ARRAY, "ABRE_ARRAY", lex, CLASS_NULL, TIPO_NULL);
+                    return new Token(ABRE_ARRAY, "ABRE_ARRAY", lex, CLASS_NULL, T_ARRAY);
                 case 31:
                     posFim = pos - 1;
                     pos--;
