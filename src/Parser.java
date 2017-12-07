@@ -161,31 +161,28 @@ public class Parser {
             casaToken(lex.ATRIB);
             if(token.getTipo() == lex.T_LINHA && token.getId() == lex.STRING){
                 tkn = EXPR();
-
                 if(tkn == null){
                     erro("\nErro semântico: Não é possível realizar operações com token inválido " + lex.linhaAtual);
                     return null;
                 }
 
-                if(tkn.getTipo() != token.getTipo()){
-                    erro("\nErro semântico: Atribuição de tipo diferente da variável " + lex.linhaAtual);
+                if(tkn.getTipo() != id.getTipo()){
+                    erro("\nErro semântico: Atribuição de tipo diferente da variável na linha" + lex.linhaAtual);
                 }
             }
             else if(token.getTipo() == lex.T_CARACTERE && token.getId() == lex.CHAR){
                 tkn = EXPR();
-
                 if(tkn == null){
                     erro("\nErro semântico: Não é possível realizar operações com token inválido " + lex.linhaAtual);
                     return null;
                 }
 
-                if(tkn.getTipo() != token.getTipo()){
+                if(tkn.getTipo() != id.getTipo()){
                     erro("\nErro semântico: Atribuição de tipo diferente da variável na linha " + lex.linhaAtual);
                 }
             }
             else if(token.getTipo() == lex.T_REAL && token.getId() == lex.NUM_REAL){
                 tkn = EXPR();
-
                 if(tkn == null){
                     erro("\nErro semântico: Não é possível realizar operações com token inválido na linha " + lex.linhaAtual);
                     return null;
@@ -197,7 +194,6 @@ public class Parser {
             }
             else if(token.getTipo() == lex.T_INTEIRO && token.getId() == lex.NUM_INTEIRO){
                 tkn = EXPR();
-
                 if(tkn == null){
                     erro("\nErro semântico: Não é possível realizar operações com token inválido na linha " + lex.linhaAtual);
                     return null;
@@ -209,7 +205,6 @@ public class Parser {
             }
             else if(token.getId() == lex.ABRE_ARRAY){
                 tkn = ARRAY();
-
                 if(tkn == null){
                     erro("\nErro semântico: Não é possível realizar operações com token inválido na linha " + lex.linhaAtual);
                     return null;
@@ -249,25 +244,24 @@ public class Parser {
             casaToken(lex.SEPARADOR);
             id = token;
             tkn = null;
+            id = atribuiTipo(id, tipo);
             casaToken(lex.ID);
             //se declaração tambem houver atribuição
             if(token.getId() == lex.ATRIB){
                 casaToken(lex.ATRIB);
                 if(token.getTipo() == lex.T_LINHA && token.getId() == lex.STRING){
                     tkn = EXPR();
-
                     if(tkn == null){
                         erro("\nErro semântico: Não é possível realizar operações com token inválido na linha " + lex.linhaAtual);
                         return null;
                     }
 
-                    if(tkn.getTipo() != token.getTipo()){
+                    if(tkn.getTipo() != id.getTipo()){
                         erro("\nErro semântico: Atribuição de tipo diferente da variável na linha " + lex.linhaAtual);
                     }
                 }
                 else if(token.getTipo() == lex.T_CARACTERE && token.getId() == lex.CHAR){
                     tkn = EXPR();
-
                     if(tkn == null){
                         erro("\nErro semântico: Não é possível realizar operações com token inválido na linha " + lex.linhaAtual);
                         return null;
@@ -279,7 +273,6 @@ public class Parser {
                 }
                 else if(token.getTipo() == lex.T_REAL && token.getId() == lex.NUM_REAL){
                     tkn = EXPR();
-
                     if(tkn == null){
                         erro("\nErro semântico: Não é possível realizar operações com token inválido na linha " + lex.linhaAtual);
                         return null;
@@ -291,7 +284,6 @@ public class Parser {
                 }
                 else if(token.getTipo() == lex.T_INTEIRO && token.getId() == lex.NUM_INTEIRO){
                     tkn = EXPR();
-
                     if(tkn == null){
                         erro("\nErro semântico: Não é possível realizar operações com token inválido na linha " + lex.linhaAtual);
                         return null;
@@ -303,7 +295,6 @@ public class Parser {
                 }
                 else if(token.getTipo() == lex.T_ARRAY && token.getId() == lex.ABRE_ARRAY){
                     tkn = ARRAY();
-
                     if(tkn == null){
                         erro("\nErro semântico: Não é possível realizar operações com token inválido na linha " + lex.linhaAtual);
                         return null;
