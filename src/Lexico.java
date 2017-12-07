@@ -17,6 +17,8 @@ public class Lexico {
 
     private JTextPane msg;
 
+    public boolean temErro = false;
+
     //classes
     public final int CLASS_NULL = -1;
     public final int CLASS_VARIAVEL = 1;
@@ -498,6 +500,7 @@ public class Lexico {
 	}
 
 	public void erro(char c) {
+	    temErro = true;
         this.msg.setText(this.msg.getText() + "\nErro léxico na coluna " + posFim + ", no caractere " + c + ", na linha " + linhaAtual + ".");
 	}
 

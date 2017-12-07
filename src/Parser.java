@@ -53,7 +53,7 @@ public class Parser {
             token.setTipo(lex.T_INTEIRO);
         }
         else{
-            erro("\n Erro semântico: Tipo não reconhecido de variável na linha " + lex.linhaAtual);
+            erro("\nErro semântico: Tipo não reconhecido de variável na linha " + lex.linhaAtual);
         }
 
         return token;
@@ -64,7 +64,7 @@ public class Parser {
         casaToken(lex.INICIO);
         casaToken(lex.ID);
         BLOCO();
-        if(!erro){
+        if(!erro && !lex.temErro){
             this.msg.setText(this.msg.getText() + "\nCompilação executada com sucesso");
         }
     }
