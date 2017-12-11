@@ -560,7 +560,15 @@ public class Parser {
                 }
             }
             else{
-                erro("\nErro semântico: Operação não permitida com o tipo de variável passado na linha " + lex.linhaAtual);
+                if(tkn.getTipo() == 0){
+                    if(tkn2.getTipo() == 0){
+                        erro("\nErro semântico: Variável não inicializada na linha " + lex.linhaAtual);
+                    }
+                    erro("\nErro semântico: Variável não inicializada na linha " + lex.linhaAtual);
+                }
+                else{
+                    erro("\nErro semântico: Operação não permitida com o tipo de variável passado na linha " + lex.linhaAtual);
+                }
             }
         }
         return tkn;
